@@ -9,7 +9,7 @@ export default function VideoPage() {
     const router = useRouter();
 
   // Google DriveファイルID
-  const driveFileId = process.env.NEXT_PUBLIC_DRIVE_FILE_ID || '1SwiFsB_PFP4H27e2nUv1InT3QsPo5J0S';
+  const driveFileId = process.env.NEXT_PUBLIC_DRIVE_FILE_ID || '1PvI96bI0zQn33B1cCF1e-Jiv2AkWqLI7';
 
   useEffect(() => {
         const token = sessionStorage.getItem('auth_token');
