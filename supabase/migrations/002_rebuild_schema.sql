@@ -21,6 +21,15 @@ drop table if exists public.closers cascade;
 drop table if exists public.leaders cascade;
 drop table if exists public.profiles cascade;
 
+-- ---- 新スキーマも毎回作り直せるよう先に破棄（再実行を冪等にする） ----
+drop table if exists public.faqs cascade;
+drop table if exists public.rate_limits cascade;
+drop table if exists public.settings cascade;
+drop table if exists public.instructors cascade;
+-- videos / sections は FK 関係があるため videos を先に
+drop table if exists public.videos cascade;
+drop table if exists public.sections cascade;
+
 -- ---- セクション（13セクションのメタ＋本文） ----------------
 create table public.sections (
   key         text primary key,          -- 'origin','instructors','plan',...

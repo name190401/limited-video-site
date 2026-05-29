@@ -1,0 +1,227 @@
+[
+  {
+    "file": "userguiding-team-directory.png",
+    "company": "userguiding",
+    "platform": "desktop",
+    "pageUrl": "https://userguiding.com/customers",
+    "similarity": 0.592692,
+    "matchCount": 1,
+    "vision": "Scrollable grid view of a team directory in a collaborative design platform, displaying numerous member profile cards with circular avatars, names, job titles like Designer or Owner, and status indicators, topped by a navigation bar with team name, search input, and action buttons for invites or management."
+  },
+  {
+    "file": "tbr-team-directory-scroll.png",
+    "company": "tbr",
+    "platform": "desktop",
+    "pageUrl": "https://mytbr.co/bibliologists/",
+    "similarity": 0.654492,
+    "matchCount": 1,
+    "vision": "A “Meet the Big Joins” team directory/people listing page showing repeated profile cards with circular headshots and short bios, arranged in alternating left-right layout down a long scroll. Includes a prominent title header and sectioned entries for multiple team members to browse and learn about staff members."
+  },
+  {
+    "file": "solstice-team-filter-sidebar.png",
+    "company": "solstice",
+    "platform": "desktop",
+    "pageUrl": "https://solstice.us/about-solstice/team/",
+    "similarity": 0.388725,
+    "matchCount": 1,
+    "vision": "Company team directory page with a left sidebar filter by department (Product, Engineering, Design, Marketing, Sales), displaying a responsive grid of team member profile cards featuring headshot photos, names, and job titles like CEO, CTO, and department heads; includes top navigation header with search bar, community links, and call-to-action \"Join\" button."
+  },
+  {
+    "file": "masterclass-instructor-profile.png",
+    "company": "masterclass",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.524984,
+    "matchCount": 1,
+    "vision": "Instructor profile screen for an online course, showing the instructor’s avatar, name, and professional title with a long bio/overview describing the course topic. The page introduces what the instructor teaches and leads into a “What you’ll learn” section with learning outcomes."
+  },
+  {
+    "file": "headway-circular-grid-social-proof.png",
+    "company": "headway",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.355023,
+    "matchCount": 1,
+    "vision": "Onboarding or intro screen presenting a motivational headline about successful people, with a grid of circular profile photos as social proof. A single primary CTA button at the bottom lets the user continue to the next step."
+  },
+  {
+    "file": "genius-more-menu-grid.png",
+    "company": "genius",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.574477,
+    "matchCount": 1,
+    "vision": "A “More” navigation menu overlay showing a grid of large icon tiles for key sections like Log in, About Us, Home, Restaurants and Bars, Wellness, Offers, Gather, and Our Locations. Includes a close button and a bottom link to Shop Goodthings for browsing an online shop."
+  },
+  {
+    "file": "discover-longscroll-jump-nav.png",
+    "company": "discover",
+    "platform": "desktop",
+    "pageUrl": "https://www.discover.com/personal-loans/faqs/",
+    "similarity": 0.604806,
+    "matchCount": 1,
+    "vision": "Long-scroll web page for a travel guide/FAQ showing multiple sections of text and bullet points with jump-to navigation and expandable/collapsible content blocks, designed for quickly browsing information. Includes a top header with back navigation and a search/filter dropdown, plus “next/previous” topic cards and footer links for continuing to related help articles."
+  },
+  {
+    "file": "youtube-course-detail-play.png",
+    "company": "youtube",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.66145,
+    "matchCount": 1,
+    "vision": "Video course detail screen for an online training playlist showing the course title, creator, lesson count, total duration, and completion progress. Primary action is a large Play button, with options to view info/description, save, and browse related videos in the series."
+  },
+  {
+    "file": "sequoia-video-grid-play.png",
+    "company": "seqouia",
+    "platform": "desktop",
+    "pageUrl": "https://www.sequoia.com/resources/videos/",
+    "similarity": 0.570457,
+    "matchCount": 1,
+    "vision": "A videos library webpage featuring a “Client Voices” section with a grid of video thumbnail cards that include play buttons, titles, and a “View All” link to browse more testimonials. The page also includes an “Other Videos” section with additional video tiles and a top navigation bar with log in and a prominent “Get Started” call-to-action."
+  },
+  {
+    "file": "mimo-locked-modules.png",
+    "company": "mimo",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.560971,
+    "matchCount": 2,
+    "vision": "Learning course overview screen for “SQL Basics” showing a progress indicator (0%) and a large play button to start the lesson, with a visual path of locked modules indicating gated content. Top bar displays language selection and gamified stats (lives/hearts, coins, streak), and bottom navigation tabs for Learn, Leaderboard, Community, and Profile."
+  },
+  {
+    "file": "kreativepro-locked-preview.png",
+    "company": "kreativepro-masterclass",
+    "platform": "desktop",
+    "pageUrl": "https://www.kreativepro.io/spark/cms-stacked-slider",
+    "similarity": 0.465223,
+    "matchCount": 1,
+    "vision": "CMS stacked slider screen previewing locked premium content with a central lock icon and geometric diamond pattern overlay, featuring a prominent purple \"Login\" button as the primary call-to-action to unlock access, flanked by left and right navigation arrows for sliding through stacked content previews on a dark-themed interface."
+  },
+  {
+    "file": "substack-paywall-blur.png",
+    "company": "substack",
+    "platform": "desktop",
+    "pageUrl": "https://substack.com/home/post/p-186215548",
+    "similarity": 0.617375,
+    "matchCount": 2,
+    "vision": "Newsletter article detail page with a paywall message indicating the post is for paid subscribers, showing a prominent Subscribe CTA and a link to sign in for existing subscribers. The screen includes the post title, author and date metadata, and partially visible content preview above the subscription prompt."
+  },
+  {
+    "file": "dalus-access-code-modal.png",
+    "company": "dalus",
+    "platform": "desktop",
+    "pageUrl": "https://www.dalus.io/access?from=%2Flearn",
+    "similarity": 0.337399,
+    "matchCount": 1,
+    "vision": "A centered modal overlay screen for entering an event access code, displaying instructional text \"This event requires an access code\" above a single text input field labeled \"Access code\" and a prominent \"Continue\" button to proceed."
+  },
+  {
+    "file": "sora-invite-code.png",
+    "company": "sora",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.59855,
+    "matchCount": 2,
+    "vision": "Invite-only access screen prompting users to enter an invite code using a multi-character code input field, with a close button to exit. Includes an option to request notifications when access opens for users without a code."
+  },
+  {
+    "file": "typo-invite-code-fields.png",
+    "company": "typo",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.618487,
+    "matchCount": 2,
+    "vision": "Invite-only onboarding screen prompting the user to enter a multi-digit invite code with separate code fields and a back navigation option. An iOS system privacy dialog appears asking permission to paste an invite code from another app, with actions to allow or deny paste."
+  },
+  {
+    "file": "binsoo-coming-soon.png",
+    "company": "binsoo",
+    "platform": "desktop",
+    "pageUrl": "https://www.binsoo.app/soon/",
+    "similarity": 0.560503,
+    "matchCount": 2,
+    "vision": "Minimal landing page “Coming Soon” placeholder screen with a large headline indicating a product or site is not yet available, featuring brand logo in the header and a primary “Download” call-to-action button."
+  },
+  {
+    "file": "confirmed-soon-empty-state.png",
+    "company": "confirmed",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.585175,
+    "matchCount": 2,
+    "vision": "Ecommerce app “Soon” tab for upcoming product drops showing an empty state message (“No drops yet”) with an illustration and a call to action to explore the shop. Bottom navigation provides access to home, shop/categories, bag/cart, and account/profile."
+  },
+  {
+    "file": "livenation-faq-accordion.png",
+    "company": "livenation",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.632164,
+    "matchCount": 2,
+    "vision": "FAQ/help screen with a “General Questions” accordion list where users can expand questions (plus icons) like “What is $30 Ticket to Summer? ” and “How does this work?"
+  },
+  {
+    "file": "ro-faq-accordion.png",
+    "company": "ro",
+    "platform": "desktop",
+    "pageUrl": "https://ro.co/faq/",
+    "similarity": 0.594016,
+    "matchCount": 2,
+    "vision": "FAQ help center page showing an accordion list of common questions with expandable answers and a “browse by category” section linking to support topics (telehealth, pricing/services, weight loss, sexual health conditions). Includes site navigation and footer support/legal links for contacting support, returns, privacy, and other resources."
+  },
+  {
+    "file": "adidas-membership-faq.png",
+    "company": "adidas",
+    "platform": "mobile",
+    "pageUrl": null,
+    "similarity": 0.57821,
+    "matchCount": 2,
+    "vision": "Membership FAQ screen with expandable accordion questions explaining a loyalty program, including membership levels and points systems. Users can tap to reveal answers about leveling up, points required per level, and whether level points or points-to-spend can be earned, used, or expire."
+  },
+  {
+    "file": "peloton-membership-pricing.png",
+    "company": "peloton",
+    "platform": "desktop",
+    "pageUrl": "https://www.onepeloton.com/en-US/membership",
+    "similarity": 0.687873,
+    "matchCount": 1,
+    "vision": "Membership pricing and plan comparison page for a fitness app, showing multiple subscription tiers with monthly costs, free-trial offers, and prominent “Start trial” CTAs. Includes a feature comparison table (workouts, tracking, programming, equipment requirements, streaming), a toggle to show only differences, and an FAQ section below."
+  },
+  {
+    "file": "groundnews-pricing-tiers.png",
+    "company": "groundnews",
+    "platform": "desktop",
+    "pageUrl": "https://ground.news/subscribe",
+    "similarity": 0.671936,
+    "matchCount": 1,
+    "vision": "Subscription pricing and plan comparison page for a news app, showing three membership tiers with monthly prices and “Subscribe/Get” buttons, plus a feature comparison table highlighting what’s included in each plan. The page also includes social proof/testimonial logos, a group subscription offer, an accordion-style FAQ section, and options for gift subscriptions and becoming a supporter."
+  },
+  {
+    "file": "breathwrk-meet-team-grid.png",
+    "company": "breathwrk",
+    "platform": "desktop",
+    "pageUrl": "https://www.breathwrk.com/team",
+    "similarity": 0.571064,
+    "matchCount": 1,
+    "vision": "Company “Meet Our Team” page showcasing a grid of team member profile photos with names, roles/titles, and short bios/credentials. Top navigation includes links to business, certification, resources, and a primary “Download Now” call-to-action, with a cookie consent popup offering decline or accept."
+  },
+  {
+    "file": "headspace-teachers-directory.png",
+    "company": "headspace",
+    "platform": "desktop",
+    "pageUrl": "https://www.headspace.com/teachers",
+    "similarity": 0.544325,
+    "matchCount": 2,
+    "vision": "Teacher/instructor directory page for a mindfulness/meditation app showcasing multiple teacher profiles with headshots, short bios, and “Read more” links, plus a “Meet our teachers” carousel and related content cards. Header navigation includes login/help and a prominent “Try for free” call to action, with promotional sections and a newsletter signup in the footer."
+  },
+  {
+    "file": "four-seasons-luxury-hero.png",
+    "company": "four-seasons",
+    "platform": "desktop",
+    "pageUrl": "https://www.fourseasons.com/us/en/lasvegas/accommodations/shared-services",
+    "similarity": 0.569652,
+    "matchCount": 1,
+    "vision": "Luxury travel and lifestyle brand landing page with a large hero image, tagline, and primary call-to-action to explore or discover destinations, plus a sticky navigation for hotels/resorts, experiences, and stories. The long-scroll homepage features curated destination highlights with imagery, newsletter signup modal, and a comprehensive footer with links and contact information."
+  }
+]
