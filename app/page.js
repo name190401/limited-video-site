@@ -1,91 +1,122 @@
-'use client';
+import Link from 'next/link';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-export default function LoginPage() {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        // 認証トークンをsessionStorageに保存
-        sessionStorage.setItem('auth_token', data.token);
-        router.push('/video');
-      } else {
-        setError('パスワードが違います');
-      }
-    } catch (err) {
-      setError('エラーが発生しました');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function TopPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">限定動画視聴</h1>
-          <p className="text-gray-500 mt-2">パスワードを入力してください</p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <input
-              type="text"
-              value={password}
-              onChange={(e) => setPassword(e.target.value.toUpperCase())}
-              placeholder="パスワード（6文字）"
-              className="w-full px-4 py-3 text-center text-2xl tracking-widest border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
-              maxLength={6}
-              autoComplete="off"
-              disabled={loading}
-            />
-            {error && (
-              <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || password.length !== 6}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white font-semibold py-3 rounded-xl transition-colors"
-          >
-            {loading ? '確認中...' : '視聴する'}
-          </button>
-        </form>
-
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <a
-            href="/admin"
-            className="text-gray-400 hover:text-gray-600 text-sm w-full block text-center"
-          >
-            管理者はこちら
-          </a>
-        </div>
+    <div className="min-h-screen bg-dark-600 text-white overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gold-400/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gold-400/[0.02] rounded-full blur-[100px]" />
       </div>
+
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between px-6 md:px-16 py-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gold-gradient rounded-sm" />
+          <span className="text-lg font-semibold tracking-wide text-gold-200">
+            PREMIUM PRESENTATIONS
+          </span>
+        </div>
+        <Link
+          href="/login"
+          className="text-sm text-gold-300 hover:text-gold-200 transition-colors border border-gold-400/30 hover:border-gold-400/60 px-5 py-2 rounded"
+        >
+          ログイン
+        </Link>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-20 pb-32 md:pt-32 md:pb-40">
+        {/* Thin gold line accent */}
+        <div className="w-16 h-px bg-gold-gradient mb-8" />
+
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-6">
+          <span className="text-gold-gradient">限定公開</span>
+          <br />
+          <span className="text-white/90">ビジネスプレゼンテーション</span>
+        </h1>
+
+        <p className="text-white/50 text-lg md:text-xl max-w-2xl leading-relaxed mb-12">
+          厳選されたプレミアムコンテンツを、
+          <br className="hidden md:block" />
+          セキュアな環境でいつでもご視聴いただけます。
+        </p>
+
+        <Link
+          href="/login"
+          className="group relative inline-flex items-center gap-3 bg-gold-gradient text-dark-600 font-semibold text-base px-10 py-4 rounded transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:scale-[1.02]"
+        >
+          メンバーログイン
+          <svg
+            className="w-4 h-4 transition-transform group-hover:translate-x-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+
+        {/* Decorative gold line below CTA */}
+        <div className="w-32 h-px bg-gradient-to-r from-transparent via-gold-400/40 to-transparent mt-16" />
+      </section>
+
+      {/* Feature Cards */}
+      <section className="relative z-10 px-6 md:px-16 pb-32">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {/* Card 1 */}
+          <div className="group bg-dark-400/60 border border-white/[0.06] rounded-lg p-8 hover:border-gold-400/20 transition-all duration-500 glow-gold-hover">
+            <div className="w-12 h-12 rounded-lg bg-gold-400/10 flex items-center justify-center mb-6">
+              <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-white/90 mb-3">セキュアな限定公開</h3>
+            <p className="text-white/40 text-sm leading-relaxed">
+              招待制のアクセス管理により、承認されたメンバーのみがコンテンツを視聴できます。情報の機密性を確保します。
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="group bg-dark-400/60 border border-white/[0.06] rounded-lg p-8 hover:border-gold-400/20 transition-all duration-500 glow-gold-hover">
+            <div className="w-12 h-12 rounded-lg bg-gold-400/10 flex items-center justify-center mb-6">
+              <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-white/90 mb-3">プレミアムコンテンツ</h3>
+            <p className="text-white/40 text-sm leading-relaxed">
+              業界トップクラスの知見を凝縮したプレゼンテーション。ビジネス成長に直結する実践的なノウハウをお届けします。
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="group bg-dark-400/60 border border-white/[0.06] rounded-lg p-8 hover:border-gold-400/20 transition-all duration-500 glow-gold-hover">
+            <div className="w-12 h-12 rounded-lg bg-gold-400/10 flex items-center justify-center mb-6">
+              <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-white/90 mb-3">いつでもどこでも</h3>
+            <p className="text-white/40 text-sm leading-relaxed">
+              PC・タブレット・スマートフォンに最適化。移動中やオフィスなど、お好きな場所でご視聴いただけます。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-6 md:px-16 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-gold-gradient rounded-sm opacity-60" />
+            <span className="text-xs text-white/30 tracking-wide">PREMIUM PRESENTATIONS</span>
+          </div>
+          <p className="text-xs text-white/20">
+            &copy; {new Date().getFullYear()} Premium Presentations. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

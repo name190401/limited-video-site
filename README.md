@@ -1,154 +1,75 @@
-# 限定動画視聴サイト
+# QUALIA サイト（video-site）
 
-パスワード保護された動画視聴サイトです。パスワードは毎日自動で変更されます。
+QUALIA オンラインプレゼンテーションシステムの実装本体（Next.js 14 / App Router）。
+プロジェクト全体の概要・要件は、親ディレクトリの [`../README.md`](../README.md) と [`../要件定義第一弾`](../要件定義第一弾) を参照。
 
-## 機能
+## 現状
 
-- 🔐 毎日自動で変わるパスワード
-- 📺 YouTube限定公開動画の埋め込み
-- 👤 管理者画面で今後7日間のパスワードを確認
-- 🚀 Vercel/Netlifyで簡単デプロイ
+- 日替わりパスワードで動画をロック／解除する**機構（デモ）が稼働中**。
+- 要件定義 v2（QUALIA版）に沿って、**本番仕様へ拡張中**（紺金デザイン・13セクション・認証の本番グレード強化）。
+- ⚠️ 未コミットの変更が多数あります（v2構成の `app/(member)/`・`app/(auth)/`・`components/`・`lib/supabase/`・`middleware.js` 等）。
+
+## 技術スタック
+
+- **Next.js 14.1**（App Router）
+- **React 18**
+- **Supabase**（`@supabase/ssr` / `@supabase/supabase-js`）：動画メタ情報・ロックパス管理等
+- **Tailwind CSS 3.4**
+- **動画**：YouTube限定公開（埋め込み）
+- **デプロイ**：Vercel
 
 ## セットアップ
 
-### 1. リポジトリをクローン
-
-```bash
-git clone <your-repo-url>
-cd video-password-site
-```
-
-### 2. 依存関係をインストール
-
 ```bash
 npm install
+cp .env.example .env.local   # 値を編集
+npm run dev                  # http://localhost:3000
 ```
 
-### 3. 環境変数を設定
+### 環境変数（`.env.local`）
 
-`.env.example` をコピーして `.env.local` を作成：
+| 変数名 | 必須 | 説明 |
+|--------|------|------|
+| `PASSWORD_SECRET_KEY` | ✅ | 日替わりパスワード生成用のシークレットキー |
+| `ADMIN_PASSWORD` | ✅ | 管理者ページ（パスワード一覧）のアクセス用 |
+| `NEXT_PUBLIC_YOUTUBE_ID` | 任意 | 表示する動画ID（デフォルトはサンプル） |
 
-```bash
-cp .env.example .env.local
-```
+> 🔜 本番強化に伴い、アクセストークン署名鍵・Supabase接続情報などを追加予定（要件定義 §7参照）。
 
-`.env.local` を編集：
+## 認証の仕組み（2層）
 
-```env
-# パスワード生成用のシークレットキー（必須）
-# ランダムな文字列を設定してください
-PASSWORD_SECRET_KEY=your-random-secret-key-12345
+- **Layer1（サイト全体）**：共通パスワード1つ。サーバー側で照合し、署名付きCookieを `middleware.js` で検証。
+- **Layer2（プラン）**：当日の日替わりパスワード（6文字英数字）。
+  - 生成：`SHA256(シークレットキー + 日付 + グループ番号)` → 紛らわしい文字（I/O/0/1）除外（`lib/password.js`）
+  - 保護：パスワード照合 → 署名付き短命トークン発行 → 動画URLをサーバー側から遅延配信
 
-# 管理者ページのパスワード（必須）
-ADMIN_PASSWORD=admin123
+### 計画中の強化（要件定義 v2）
 
-# YouTube動画ID（任意）
-NEXT_PUBLIC_YOUTUBE_ID=your-youtube-video-id
-```
-
-### 4. ローカルで起動
-
-```bash
-npm run dev
-```
-
-http://localhost:3000 でアクセス
-
-## デプロイ（Vercel）
-
-### 1. Vercelにログイン
-
-```bash
-npx vercel login
-```
-
-### 2. デプロイ
-
-```bash
-npx vercel
-```
-
-### 3. 環境変数を設定
-
-Vercelダッシュボード → Settings → Environment Variables で以下を設定：
-
-| 変数名 | 値 | 説明 |
-|--------|-----|------|
-| `PASSWORD_SECRET_KEY` | ランダムな文字列 | パスワード生成用 |
-| `ADMIN_PASSWORD` | 管理者パスワード | 管理画面アクセス用 |
-| `NEXT_PUBLIC_YOUTUBE_ID` | YouTube動画ID | 表示する動画 |
-
-### 4. 本番デプロイ
-
-```bash
-npx vercel --prod
-```
-
-## デプロイ（Netlify）
-
-### 1. netlify.toml を作成（ルートに追加）
-
-```toml
-[build]
-  command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-```
-
-### 2. Netlifyにデプロイ
-
-GitHubリポジトリを連携するか、CLIでデプロイ：
-
-```bash
-npx netlify deploy --prod
-```
-
-### 3. 環境変数を設定
-
-Netlifyダッシュボード → Site settings → Environment variables で設定
+- 日替わりの境界を **UTC → JST基準** へ変更（現状はUTC 0:00切替）
+- 解除状態を `sessionStorage` フラグ → **サーバー発行の署名付きトークン**へ
+- 動画URLの**遅延配信API**新設（`/api/plan/unlock`・`/api/plan/content`）
+- **レート制限**（試行回数制限）の追加
 
 ## 使い方
 
-### 閲覧者向け
-
-1. サイトにアクセス
-2. 管理者から共有されたパスワード（6文字）を入力
+### 閲覧者
+1. サイトにアクセス → Layer1の共通パスワードを入力
+2. プランを開く → 管理者から共有された当日のロックパス（6文字）を入力
 3. 動画を視聴
 
-### 管理者向け
+### 管理者
+1. 管理画面にアクセス → 管理者パスワードでログイン
+2. 今後7日分のパスワードを確認し、紹介者へ共有
 
-1. `/admin` にアクセス
-2. 管理者パスワードでログイン
-3. 今日のパスワードを確認してLINEやメールで共有
+## デプロイ（Vercel）
 
-## パスワードの仕組み
-
+```bash
+npx vercel          # プレビュー
+npx vercel --prod   # 本番
 ```
-シークレットキー + 今日の日付 → SHA256ハッシュ → 6文字のパスワード
-```
 
-- パスワードは毎日 0:00 UTC に自動で変わります
-- 同じシークレットキーを使う限り、同じ日付なら同じパスワードが生成されます
-- 紛らわしい文字（I, O, 0, 1）は除外されています
-
-## セキュリティについて
-
-- シークレットキーはサーバーサイドでのみ使用（クライアントに露出しません）
-- 認証トークンは日付ベースで、翌日には無効になります
-- 管理画面は別途パスワード保護されています
-
-## カスタマイズ
-
-### 動画を変更する
-
-環境変数 `NEXT_PUBLIC_YOUTUBE_ID` を変更するか、`app/video/page.js` を編集
-
-### デザインを変更する
-
-Tailwind CSSを使用しています。各ページの className を編集してください。
+Vercel ダッシュボード → Settings → Environment Variables で上記の環境変数を設定する。
 
 ## ライセンス
 
-MIT
+Private（QUALIA / castle 専用）

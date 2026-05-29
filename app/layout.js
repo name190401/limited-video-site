@@ -1,14 +1,15 @@
 import './globals.css'
 
 export const metadata = {
-  title: '限定動画視聴',
-  description: 'パスワード保護された動画視聴サイト',
+  title: 'プレミアムビジネスプレゼンテーション',
+  description: 'メンバー限定のビジネスプレゼンテーションプラットフォーム',
+  robots: { index: false, follow: false },
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body className="bg-dark-600 text-white">{children}</body>
     </html>
   )
 }
