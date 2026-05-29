@@ -4,14 +4,50 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #EEF2FB; /* navy-50: 明るめベース面 */
+  color: #0C1530; /* navy-900 */
 }
 
 h1, h2, h3 {
   font-family: 'Noto Serif JP', serif;
+}
+
+/* 章扉アンカーのスクロールオフセット（固定ハンバーガー分） */
+.scroll-anchor {
+  scroll-margin-top: 72px;
+}
+
+/* 石壁テクスチャ（講師グリッド背景のみ・§1）: navy-800 地 + 微ノイズ + 上下 gold 1px */
+.stone-texture {
+  background-color: #132040;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 5px;
+  border-top: 1px solid #D4AF37;
+  border-bottom: 1px solid #D4AF37;
+}
+
+/* 横スクロールストリップ（09 製品予告・属性チップ）: スクロールバー控えめ */
+.scroll-strip {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.scroll-strip::-webkit-scrollbar {
+  height: 4px;
+}
+.scroll-strip::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 2px;
 }
 
 /* Gold gradient utility */
@@ -37,6 +73,12 @@ h1, h2, h3 {
 
 .glow-gold-hover:hover {
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+}
+
+/* 07 unlocked の解除アニメ（§8: fade-in + translateY, 250ms ease-out） */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Prevent text selection on video areas */

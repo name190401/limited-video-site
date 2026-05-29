@@ -1,0 +1,54 @@
+import ChapterHeader from '../ChapterHeader'
+import BackToHub from '../BackToHub'
+import VideoPlayer from '../../ui/VideoPlayer'
+
+/**
+ * 10 トレーニング（§6）。章扉（件数バッジ）→ 9項目を2列タイルグリッド。
+ * 各タイル: 番号＋タイトル＋担当（subtitle）＋状態ピル。公開済はタイル内に動画、準備中はピル＋opacity0.7。
+ *
+ * @param {Array} videos  section_key='training' の videos（sort_order 順）
+ */
+export default function TrainingSection({ videos = [] }) {
+  const pubCount = videos.filter((v) => v.status === 'published' && v.youtube_id).length
+  const badge = `公開 ${pubCount} / 全 ${videos.length}`
+
+  return (
+    <section className="bg-navy-50 px-5 py-14 md:px-10">
+      <div className="md:max-w-[680px] md:mx-auto">
+        <ChapterHeader num="10" title="トレーニング" badge={badge} />
+
+        <div className="grid grid-cols-2 gap-3">
+          {videos.map((v, i) => {
+            const ready = v.status === 'published' && v.youtube_id
+            return (
+              <div
+                key={v.id}
+                className={`rounded-xl border border-gold-400/70 bg-white p-3.5 flex flex-col ${ready ? '' : 'opacity-70'}`}
+              >
+                <div className="flex items-start justify-between">
+                  <span className="text-gold-600 text-[11px] font-bold tracking-[0.12em]">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  {!ready && (
+                    <span className="border border-gold-400 text-gold-600 text-[10px] font-bold rounded-full px-2 py-0.5">
+                      準備中
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1.5 font-semibold text-navy-900 text-[14px] leading-snug">{v.title}</p>
+                {v.subtitle && <p className="mt-1 text-navy-400 text-[12px]">担当：{v.subtitle}</p>}
+                {ready && (
+                  <div className="mt-2">
+                    <VideoPlayer videoId={v.youtube_id} title={v.title} />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <BackToHub />
+      </div>
+    </section>
+  )
+}
