@@ -1,55 +1,41 @@
-import { updateSession } from '@/lib/supabase/middleware'
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+import { LAYER1_COOKIE, verifyLayer1CookieValue } from '@/lib/auth/layer1';
+
+/**
+ * Layer1 ゲート：有効な共通パスワード Cookie が無ければ /enter へリダイレクト。
+ *
+ * - Cookie 検証は Web Crypto（lib/crypto-token.js）で行うため Edge ランタイムで動く。
+ * - /api/* は matcher 除外（各 API ハンドラが自前で認証・認可する）。
+ * - /enter（ゲート画面）は素通し。
+ * - /admin（管理画面）は Layer1 を免除し、管理者パスワードで自前ゲートする
+ *   （保守する人が共通パスワードと管理者パスワードの両方を覚えなくて済むように）。
+ */
+
+function isExempt(pathname) {
+  return pathname === '/enter' || pathname.startsWith('/admin');
+}
 
 export async function middleware(request) {
-  const { pathname } = request.nextUrl
+  const { pathname } = request.nextUrl;
 
-  // メンバーページは認証必須
-  if (pathname.startsWith('/member') || pathname.startsWith('/leaders') || pathname.startsWith('/videos') || pathname.startsWith('/closers')) {
-    const { user, supabaseResponse } = await updateSession(request)
-
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    return supabaseResponse
+  if (isExempt(pathname)) {
+    return NextResponse.next();
   }
 
-  // 管理者ページはロールチェック
-  if (pathname.startsWith('/admin')) {
-    const { user, supabaseResponse } = await updateSession(request)
+  const cookie = request.cookies.get(LAYER1_COOKIE)?.value;
+  const ok = await verifyLayer1CookieValue(cookie);
 
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    return supabaseResponse
+  if (!ok) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/enter';
+    url.search = '';
+    return NextResponse.redirect(url);
   }
 
-  // ログインページ: 既にログイン済みならメンバーページへ
-  if (pathname === '/login' || pathname === '/register') {
-    const { user, supabaseResponse } = await updateSession(request)
-
-    if (user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/member'
-      return NextResponse.redirect(url)
-    }
-
-    return supabaseResponse
-  }
-
-  // その他のページはセッション更新のみ
-  const { supabaseResponse } = await updateSession(request)
-  return supabaseResponse
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|api/).*)',
-  ],
-}
+  // 静的アセット・画像・favicon・robots・api を除く全ルートを保護
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|api/).*)'],
+};
