@@ -1,0 +1,15 @@
+{
+  "target": "QUALIA メンバーサイト ゴージャス化（/enter + 会員ページ13章）— 金メタリック質感 & タイポ grade up が主役",
+  "base_dir": "/Users/hajime/Desktop/限定公開/video-site/design/gorgeous",
+  "max_rounds": 6,
+  "rounds": [
+    {"n": 1, "verdict": "FAIL", "review_path": "round-1/review_round_1.md", "key_issues": ["タイポ階層の確定pxスケール表が無い", "案A①擬似エンボスの実コード未確定", "推奨ハイブリッドの9要素×A/B採用確定表が無い", "375pxワードマーク折返し検証値・disabled/focus・再描画負荷・13章eyebrow語彙が⚠"]},
+    {"n": 2, "verdict": "PASS", "review_path": "round-2/review_round_2.md", "key_issues": ["carry⚠: Cinzel/Cormorantのtailwind fontFamily登録方法未明記", "carry⚠: drop-shadowのSafari/Chrome実機目視確認"]},
+    {"n": 3, "verdict": "PASS", "review_path": "round-3/review_round_3.md", "key_issues": []}
+  ],
+  "consecutive_pass": 2,
+  "consecutive_fail": 0,
+  "status": "completed",
+  "final_dir": "FINAL/",
+  "note": "subagentコンテキストのためTask/Skill/WebSearch/WebFetch不可。orchestratorがdesigner/reviewer両役をin-threadで厳格実行。参照はcurl実在確認+既存Lazywebスクショ。連続2ラウンドPASS(round-2,round-3)で完了。"
+}

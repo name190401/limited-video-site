@@ -2,7 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Cinzel:wght@400;500;600&family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+/* ── 金メタリック・プリミティブ（ゴージャス基盤） ───────────────── */
+:root {
+  /* ボタン面・箔の縦ハイライト帯 */
+  --gold-foil: linear-gradient(100deg,
+    #876E2F 0%, #D4AF37 22%, #F5E6A3 46%, #FBF7EC 52%,
+    #E0C57B 60%, #C5A55A 78%, #A68A3E 100%);
+  /* 罫・縁・両端フェード */
+  --gold-hairline: linear-gradient(90deg, transparent 0%, #876E2F 8%,
+    #D4AF37 30%, #F5E6A3 50%, #D4AF37 70%, #876E2F 92%, transparent 100%);
+  /* テキストclip・上明下暗で立体 */
+  --gold-text: linear-gradient(180deg, #FBF7EC 0%, #E0C57B 28%,
+    #D4AF37 50%, #A68A3E 78%, #876E2F 100%);
+}
+
+/* 金テキストclip（見出し番号・ワードマーク等） */
+.gold-clip {
+  background: var(--gold-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ワードマーク立体感（drop-shadowはclip-textに乗る／text-shadowは乗らない） */
+.wordmark {
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.30))
+    drop-shadow(0 2px 3px rgba(12, 21, 48, 0.55));
+}
+
+/* 金ヘアライン罫（中央菱形オーナメント付きの区切りで使う1px帯） */
+.gold-hairline {
+  background: var(--gold-hairline);
+}
+
+/* 金箔ボタン（はいる／解除する 等の主役CTA） */
+.btn-gold {
+  position: relative;
+  overflow: hidden;
+  background: var(--gold-foil);
+  color: #0C1530;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 4px rgba(74, 59, 23, 0.45),
+    0 4px 14px rgba(212, 175, 55, 0.28);
+  background-size: 130% 100%;
+  background-position: 50% 0;
+  transition: background-position 220ms ease, box-shadow 220ms ease;
+}
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 45%);
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .btn-gold:not(:disabled):hover {
+    background-position: 8% 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 -2px 4px rgba(74, 59, 23, 0.45),
+      0 6px 18px rgba(212, 175, 55, 0.34);
+  }
+}
+.btn-gold:focus-visible {
+  outline: 2px solid #F5E6A3;
+  outline-offset: 2px;
+}
+.btn-gold:disabled {
+  filter: saturate(0.55) brightness(0.9);
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btn-gold:disabled::before {
+  display: none;
+}
 
 html {
   scroll-behavior: smooth;

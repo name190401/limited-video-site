@@ -26,7 +26,10 @@ export default function Hub({ sections }) {
   return (
     <section id="hub" className="scroll-anchor bg-navy-50 px-5 py-12 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
-        <p className="text-center text-navy-400 text-[12px] tracking-[0.12em] mb-6">
+        <p className="text-center font-cormorant text-gold-500 text-[11px] tracking-[0.34em] [font-variant:small-caps] mb-1">
+          Contents
+        </p>
+        <p className="text-center text-navy-400 text-[12px] tracking-[0.12em] mb-6 font-sansjp">
           見たい項目を選んでください
         </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -38,12 +41,13 @@ export default function Hub({ sections }) {
               <a
                 key={s.key}
                 href={`#sec-${num}`}
-                className={`relative flex flex-col gap-2 rounded-xl border border-gold-400/70 bg-white p-3.5 min-h-[96px] transition-shadow hover:shadow-md ${
+                style={{ boxShadow: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)' }}
+                className={`relative flex flex-col gap-2 rounded-xl border border-gold-400/50 bg-white p-3.5 min-h-[96px] transition-transform hover:-translate-y-0.5 ${
                   soon ? 'opacity-70' : ''
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="text-gold-600 text-[11px] font-bold tracking-[0.12em]">{num}</span>
+                  <span className="gold-clip font-cinzel font-medium text-[14px] tracking-[0.10em] leading-none">{num}</span>
                   {isPlan ? (
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -52,14 +56,14 @@ export default function Hub({ sections }) {
                     <SectionIcon sectionKey={s.key} className="w-5 h-5" />
                   )}
                 </div>
-                <span className="font-semibold text-navy-900 text-[14px] leading-snug">{s.title}</span>
+                <span className="font-serifjp font-semibold text-navy-900 text-[14px] leading-snug">{s.title}</span>
                 {soon && (
                   <div className="mt-auto flex items-center justify-between">
-                    <span className="inline-block border border-gold-400 text-gold-600 text-[10px] font-bold tracking-[0.1em] rounded-full px-2 py-0.5">
+                    <span className="inline-block border border-gold-500 text-gold-700 text-[10px] font-medium tracking-[0.14em] rounded-full px-2.5 py-0.5">
                       準備中
                     </span>
                     {PLANNED_MONTH[s.key] && (
-                      <span className="text-navy-400 text-[11px]">{PLANNED_MONTH[s.key]}</span>
+                      <span className="text-navy-400 text-[11px] tracking-[0.04em]">{PLANNED_MONTH[s.key]}</span>
                     )}
                   </div>
                 )}

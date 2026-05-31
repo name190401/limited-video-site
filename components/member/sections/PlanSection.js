@@ -104,19 +104,28 @@ export default function PlanSection({ openVideos = [] }) {
         {!unlocked ? (
           /* ── locked: 金1px 区切り線 ＋ ハードカットのゲートブロック ── */
           <div className="mt-6">
-            <div className="border-t border-gold-400" />
-            <div className="relative rounded-b-xl bg-navy-900 px-6 py-12 text-center overflow-hidden">
+            <div className="flex items-center justify-center gap-2">
+              <span className="h-px w-10 gold-hairline" />
+              <span className="w-1 h-1 rotate-45 bg-gold-400" />
+              <span className="h-px w-10 gold-hairline" />
+            </div>
+            <div
+              className="relative mt-4 rounded-xl px-6 py-12 text-center overflow-hidden"
+              style={{ background: 'radial-gradient(120% 80% at 50% 0%, #1B2A52, #0C1530)' }}
+            >
               {/* 背後に "もっとある" の輪郭（うっすら） */}
               <div className="absolute inset-x-6 bottom-0 h-20 opacity-10 pointer-events-none">
                 <div className="h-full rounded-lg bg-navy-100" />
               </div>
-              {/* 鍵アイコン 28px */}
-              <span className="relative inline-flex items-center justify-center w-7 h-7 rounded-full border border-gold-400 mb-4">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              {/* 鍵アイコン 28px（金ヘアラインリング） */}
+              <span className="relative inline-flex mb-4 rounded-full p-px gold-hairline">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-navy-900">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </span>
-              <p className="relative text-navy-100 text-[14px] mb-6">続きは紹介者から合言葉を聞いて開けます</p>
+              <p className="relative font-serifjp text-white text-[15px] leading-[1.9] mb-6">続きは紹介者から合言葉を聞いて開けます</p>
 
               <form onSubmit={handleUnlock} className="relative flex flex-col items-center">
                 <input
@@ -132,7 +141,7 @@ export default function PlanSection({ openVideos = [] }) {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="mt-5 rounded-full border border-gold-400 text-gold-400 font-semibold text-[14px] px-8 py-3 disabled:opacity-50"
+                  className="btn-gold mt-5 rounded-full font-sansjp font-semibold text-[14px] tracking-[0.06em] px-8 py-3"
                 >
                   {busy ? '確認中…' : '解除する'}
                 </button>

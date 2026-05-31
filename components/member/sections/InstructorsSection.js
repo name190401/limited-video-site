@@ -34,16 +34,19 @@ export default function InstructorsSection({ instructors = [] }) {
         {/* 主役カード */}
         {lead && (
           <div className="flex flex-col items-center text-center mb-10">
-            {lead.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={lead.photo_url} alt={lead.name} className="w-32 h-32 rounded-full object-cover ring-2 ring-gold-400" />
-            ) : (
-              <span className="w-32 h-32 rounded-full ring-2 ring-gold-400 bg-navy-800 flex items-center justify-center text-gold-400 font-serif text-3xl">
-                {lead.name?.[0]}
-              </span>
-            )}
-            <p className="mt-3 font-serif text-[22px] text-navy-900">{lead.name}</p>
-            <span className="mt-1 text-gold-600 text-[11px] font-bold tracking-[0.12em]">castle 講師</span>
+            <span className="rounded-full p-px gold-hairline" style={{ boxShadow: '0 8px 24px -8px rgba(12,21,48,0.5)' }}>
+              {lead.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={lead.photo_url} alt={lead.name} className="block w-32 h-32 rounded-full object-cover" />
+              ) : (
+                <span className="w-32 h-32 rounded-full bg-navy-800 flex items-center justify-center text-gold-300 font-cinzel text-3xl">
+                  {lead.name?.[0]}
+                </span>
+              )}
+            </span>
+            <p className="mt-4 font-serifjp text-[22px] text-navy-900">{lead.name}</p>
+            <span className="mt-1 text-gold-600 text-[11px] font-medium tracking-[0.12em]">castle 講師</span>
+            <span className="mt-0.5 font-cormorant text-gold-500 text-[10px] tracking-[0.34em] [font-variant:small-caps]">CASTLE INSTRUCTOR</span>
             {(lead.region || lead.age) && (
               <p className="mt-1 text-navy-400 text-[12px]">
                 {lead.region}
@@ -92,10 +95,12 @@ export default function InstructorsSection({ instructors = [] }) {
                       className="flex flex-col items-center"
                     >
                       {hasPhoto ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={i.photo_url} alt={i.name} className="w-20 h-20 rounded-full object-cover border border-gold-400" />
+                        <span className="rounded-full p-px gold-hairline">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={i.photo_url} alt={i.name} className="block w-20 h-20 rounded-full object-cover" />
+                        </span>
                       ) : (
-                        <span className="w-20 h-20 rounded-full border border-dashed border-gold-400 bg-navy-900/40 flex items-center justify-center text-gold-400 font-serif text-lg">
+                        <span className="w-20 h-20 rounded-full border border-dashed border-gold-400 bg-navy-900/40 flex items-center justify-center text-gold-300 font-cinzel text-lg">
                           {i.name?.[0]}
                         </span>
                       )}

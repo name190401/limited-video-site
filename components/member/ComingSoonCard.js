@@ -12,18 +12,21 @@
 export default function ComingSoonCard({ title, month, owner, compact = false }) {
   return (
     <div
-      className={`relative rounded-xl border border-gold-400/70 bg-navy-50 p-4 opacity-70 ${
+      style={{ boxShadow: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)' }}
+      className={`relative rounded-xl border border-gold-400/50 bg-navy-50 p-4 opacity-80 ${
         compact ? 'shrink-0 w-44' : 'w-full'
       }`}
     >
-      <span className="text-gold-600 text-[11px] font-bold tracking-[0.12em]">準備中</span>
-      <p className="mt-1.5 font-semibold text-navy-900 text-[15px] leading-snug">{title}</p>
-      {month && <p className="mt-1 text-navy-400 text-[12px]">{month}公開予定</p>}
+      <span className="inline-block border border-gold-500 text-gold-700 text-[10px] font-medium tracking-[0.14em] rounded-full px-2.5 py-0.5">準備中</span>
+      <p className="mt-2.5 font-serifjp font-semibold text-navy-900 text-[15px] leading-snug">{title}</p>
+      {month && <p className="mt-1 text-navy-400 text-[12px] tracking-[0.04em]">{month}公開予定</p>}
       {owner?.name && (
         <div className="mt-3 flex items-center gap-2">
           {owner.photo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={owner.photo_url} alt="" className="w-6 h-6 rounded-full object-cover border border-gold-400" />
+            <span className="rounded-full p-px gold-hairline">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={owner.photo_url} alt="" className="block w-6 h-6 rounded-full object-cover" />
+            </span>
           ) : (
             <span className="w-6 h-6 rounded-full border border-dashed border-gold-400" />
           )}

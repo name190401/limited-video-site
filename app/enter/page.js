@@ -37,11 +37,19 @@ export default function EnterPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-b from-navy-900 via-navy-700 to-navy-800">
       <div className="w-full max-w-sm text-center">
-        <h1 className="font-serif text-5xl tracking-wide text-white">QUALIA</h1>
-        <p className="mt-3 text-navy-100 text-sm">メンバーページ</p>
+        <h1
+          className="wordmark gold-clip font-cinzel font-semibold leading-none"
+          style={{ fontSize: 'clamp(40px, 11.2vw, 56px)', letterSpacing: '0.14em' }}
+        >
+          QUALIA
+        </h1>
+        <p className="mt-3 font-cormorant italic text-gold-300 text-[12px] tracking-[0.34em] [font-variant:small-caps]">
+          Members Only
+        </p>
+        <p className="mt-2 text-navy-100 text-[13px] font-sansjp tracking-[0.08em]">メンバーページ</p>
 
         <form onSubmit={handleSubmit} className="mt-10">
-          <label className="block text-left text-navy-100 text-sm mb-2">
+          <label className="block text-left text-navy-100 text-[12px] mb-2 tracking-[0.06em] font-sansjp">
             合言葉（パスワード）
           </label>
           <input
@@ -51,13 +59,13 @@ export default function EnterPage() {
             placeholder="パスワードを入力"
             autoComplete="off"
             disabled={loading}
-            className="w-full px-4 py-3 rounded-xl bg-navy-800/70 border border-gold-400/30 text-white placeholder-navy-200/50 text-center tracking-wide focus:border-gold-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-navy-800/70 border border-gold-400/40 text-white placeholder-navy-200/50 text-center tracking-wide focus:border-gold-400 focus:outline-none transition-colors"
           />
           {error && <p className="mt-3 text-sm text-rose-300">{error}</p>}
           <button
             type="submit"
             disabled={loading || password.length === 0}
-            className="mt-6 w-full py-3 rounded-xl font-semibold text-navy-900 bg-gradient-to-r from-gold-300 to-gold-500 disabled:opacity-50 transition-opacity"
+            className="btn-gold mt-6 w-full py-3 rounded-xl font-sansjp font-semibold text-[15px] tracking-[0.06em]"
           >
             {loading ? '確認中…' : 'はいる'}
           </button>

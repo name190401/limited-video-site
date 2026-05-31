@@ -6,6 +6,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        cinzel: ['Cinzel', 'serif'],
+        cormorant: ['"Cormorant Garamond"', 'serif'],
+        serifjp: ['"Noto Serif JP"', 'serif'],
+        sansjp: ['"Noto Sans JP"', 'sans-serif'],
+      },
       colors: {
         gold: {
           50: '#FBF7EC',
