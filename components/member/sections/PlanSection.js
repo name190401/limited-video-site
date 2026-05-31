@@ -27,16 +27,19 @@ export default function PlanSection({ openVideos = [] }) {
   const [busy, setBusy] = useState(false)
   const [tab, setTab] = useState('short')
 
-  // 再訪時: Cookie が有効なら解除済として保護動画を取得（401 は未解除＝そのまま locked）
+  // 再訪時: まず status で解除状態だけ確認し（常に 200）、解除済のときだけ保護動画を取得。
+  // 未解除で /api/plan/content を叩くと 401 がコンソールに出るため、content は解除済確認後のみ。
   useEffect(() => {
     let alive = true
-    fetch('/api/plan/content', { cache: 'no-store' })
+    fetch('/api/plan/status', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (!alive || !s?.unlocked) return null
+        setUnlocked(true)
+        return fetch('/api/plan/content', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
+      })
       .then((d) => {
-        if (alive && d?.videos) {
-          setUnlocked(true)
-          setPlanVideos(d.videos)
-        }
+        if (alive && d?.videos) setPlanVideos(d.videos)
       })
       .catch(() => {})
     return () => {
