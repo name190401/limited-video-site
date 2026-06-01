@@ -22,7 +22,7 @@ export default function VideoGridSection({ num, title, lead, videos = [], desire
   }
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num={num} title={title} />
         {lead && <p className="text-navy-900/80 text-[14px] mb-5">{lead}</p>}

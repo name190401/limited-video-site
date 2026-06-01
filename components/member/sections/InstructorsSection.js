@@ -27,7 +27,7 @@ export default function InstructorsSection({ instructors = [] }) {
   const filtered = filter === 'all' ? rest : rest.filter((i) => (i.attribute_tags || []).includes(filter))
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="02" title="講師紹介" />
 

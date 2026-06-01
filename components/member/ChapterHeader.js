@@ -10,6 +10,8 @@
  * @param {string} eyebrow - 英ラベル。未指定なら num から既定値を引く。
  * @param {boolean} onGradient - グラデ地（紺）の上に置くか。既定は薄地。
  */
+import Reveal from './Reveal'
+
 const EYEBROW = {
   '01': 'ORIGIN',
   '02': 'INSTRUCTORS',
@@ -30,6 +32,7 @@ export default function ChapterHeader({ num, title, badge, eyebrow, onGradient =
   const label = eyebrow ?? EYEBROW[num] ?? ''
   return (
     <div id={`sec-${num}`} data-section={num} className="scroll-anchor pt-8 pb-3 mb-6">
+      <Reveal>
       {/* 金ヘアライン罫＋中央菱形オーナメント */}
       <div className="flex items-center justify-center gap-2 mb-6">
         <span className="h-px w-10 gold-hairline" />
@@ -70,6 +73,7 @@ export default function ChapterHeader({ num, title, badge, eyebrow, onGradient =
           {badge}
         </p>
       )}
+      </Reveal>
     </div>
   )
 }

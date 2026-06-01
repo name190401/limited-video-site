@@ -12,7 +12,7 @@ import ComingSoonCard from '../ComingSoonCard'
  */
 export default function InstagramSection({ igUrl, posts = [] }) {
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="06" title="Instagram" />
 

@@ -161,6 +161,114 @@ h1, h2, h3 {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── リッチ化（奥行き・モーション・メディア） ───────────────── */
+
+/* (a) スクロール reveal 機構（no-JS / reduced-motion 安全：初期透明化は no-preference 配下のみ） */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 240ms ease-out, transform 240ms ease-out;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* (b) 奥行き背景（単一微グラデ＋金ヘアライン区切り） */
+.section-surface {
+  background: linear-gradient(180deg, #EEF2FB 0%, #E8EEF9 100%);
+}
+.section-divider {
+  position: relative;
+}
+.section-divider::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: var(--gold-hairline);
+  opacity: 0.5;
+}
+
+/* (c) VideoPlayer メディアリッチ（box-shadow は静的・opacity だけ動かす） */
+.video-frame::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.18);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.video-frame:hover::after {
+  opacity: 1;
+}
+.video-skeleton {
+  background: linear-gradient(100deg, #132040 30%, #1B2A52 50%, #132040 70%);
+  background-size: 250% 100%;
+}
+
+/* (d) ステップ接続線（丸数字径に合わせ left を調整。Bonus=lg / Steps=sm） */
+.step-chain > li {
+  position: relative;
+}
+.step-chain--lg > li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 36px;
+  bottom: -20px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.5), rgba(212, 175, 55, 0.15));
+}
+.step-chain--sm > li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 32px;
+  bottom: -16px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.5), rgba(212, 175, 55, 0.15));
+}
+
+/* (e) アコーディオン（grid-rows 0fr↔1fr・高さ計測不要） */
+.acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+.acc-panel.is-open {
+  grid-template-rows: 1fr;
+}
+.acc-panel > div {
+  overflow: hidden;
+}
+
+/* (f) タイル glow（Hub・opacity 方式） */
+.tile-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.tile-glow:hover::after {
+  opacity: 1;
+}
+
+/* reduced-motion 時は常時/遷移アニメを停止 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer { animation: none !important; }
+  .acc-panel { transition: none; }
+}
+
 /* Prevent text selection on video areas */
 .no-select {
   -webkit-user-select: none;

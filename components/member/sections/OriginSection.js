@@ -7,7 +7,7 @@ export default function OriginSection({ section }) {
     section?.body ||
     'QUALIA（クオリア）は、「五感で感じる質的な経験」を意味する言葉です。\n数字や条件だけでは語り尽くせない、一人ひとりが手にする実感・変化・つながり——その「質」をいちばん大切にしたい。その想いから、この名前を選びました。'
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="01" title="QUALIA の名前の由来" />
         <div className="max-w-[640px] mx-auto">

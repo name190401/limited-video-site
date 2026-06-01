@@ -81,7 +81,7 @@ export default function PlanSection({ openVideos = [] }) {
   const longs = planVideos.filter((v) => v.variant === 'long')
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="07" title="プラン" />
 
@@ -168,7 +168,7 @@ export default function PlanSection({ openVideos = [] }) {
                 </button>
               ))}
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            <div key={tab} className="grid grid-cols-1 gap-4 animate-fade-in">
               {(tab === 'short' ? shorts : longs).length > 0 ? (
                 (tab === 'short' ? shorts : longs).map((v) => (
                   <div key={v.id}>

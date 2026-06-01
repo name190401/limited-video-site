@@ -13,7 +13,7 @@ export default function TrainingSection({ videos = [] }) {
   const badge = `公開 ${pubCount} / 全 ${videos.length}`
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="10" title="トレーニング" badge={badge} />
 

@@ -24,7 +24,7 @@ export default function ClosingSection({ closers = [], videos = [] }) {
     : []
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="05" title="クロージング" />
 
@@ -53,7 +53,7 @@ export default function ClosingSection({ closers = [], videos = [] }) {
               })}
             </div>
             {activeVideos.length ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div key={active} className="grid grid-cols-2 gap-3 animate-fade-in">
                 {activeVideos.map((v) => (
                   <div key={v.id}>
                     <VideoPlayer videoId={v.youtube_id} title={v.title} />

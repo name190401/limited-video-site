@@ -24,7 +24,7 @@ function pad(n) {
  */
 export default function Hub({ sections }) {
   return (
-    <section id="hub" className="scroll-anchor bg-navy-50 px-5 py-12 md:px-10">
+    <section id="hub" className="scroll-anchor relative section-surface section-divider px-5 py-12 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <p className="text-center font-cormorant text-gold-500 text-[11px] tracking-[0.34em] [font-variant:small-caps] mb-1">
           Contents
@@ -42,7 +42,7 @@ export default function Hub({ sections }) {
                 key={s.key}
                 href={`#sec-${num}`}
                 style={{ boxShadow: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)' }}
-                className={`relative flex flex-col gap-2 rounded-xl border border-gold-400/50 bg-white p-3.5 min-h-[96px] transition-transform hover:-translate-y-0.5 ${
+                className={`tile-glow relative flex flex-col gap-2 rounded-xl border border-gold-400/50 bg-white p-3.5 min-h-[96px] transition-[transform,opacity] hover:-translate-y-0.5 ${
                   soon ? 'opacity-70' : ''
                 }`}
               >

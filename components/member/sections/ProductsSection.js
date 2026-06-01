@@ -24,7 +24,7 @@ export default function ProductsSection({ videos = [] }) {
   const badge = `公開 ${published.length} / 予定 ${soon.length}`
 
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="09" title="製品" badge={badge} />
 
@@ -49,7 +49,7 @@ export default function ProductsSection({ videos = [] }) {
                 ))}
               </div>
             )}
-            <div className="grid grid-cols-1 gap-4">
+            <div key={tab} className="grid grid-cols-1 gap-4 animate-fade-in">
               {shown.map((v) => (
                 <div key={v.id}>
                   <VideoPlayer videoId={v.youtube_id} title={v.title} muted={v.variant === 'short' && v.audio_muted} />

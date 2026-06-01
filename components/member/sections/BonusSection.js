@@ -1,6 +1,7 @@
 import ChapterHeader from '../ChapterHeader'
 import BackToHub from '../BackToHub'
 import ComingSoonCard from '../ComingSoonCard'
+import Reveal from '../Reveal'
 
 /**
  * 08 ボーナス（インカム・§6）。
@@ -15,21 +16,21 @@ const STEPS = [
 
 export default function BonusSection({ section }) {
   return (
-    <section className="bg-navy-50 px-5 py-14 md:px-10">
+    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
       <div className="md:max-w-[680px] md:mx-auto">
         <ChapterHeader num="08" title="ボーナス（インカム）" />
 
-        <ol className="max-w-[640px] mx-auto space-y-5">
-          {STEPS.map((s) => (
-            <li key={s.n} className="flex gap-4">
-              <span className="shrink-0 w-9 h-9 rounded-full border border-gold-400 text-gold-600 font-serif text-lg flex items-center justify-center">
+        <ol className="step-chain step-chain--lg max-w-[640px] mx-auto space-y-5">
+          {STEPS.map((s, i) => (
+            <Reveal as="li" key={s.n} delay={i * 70} className="flex gap-4">
+              <span className="shrink-0 w-9 h-9 rounded-full border border-gold-400 text-gold-600 font-serif text-lg flex items-center justify-center bg-[#EEF2FB]">
                 {s.n}
               </span>
               <div className="pt-0.5">
                 <p className="font-semibold text-navy-900 text-[16px]">{s.label}</p>
                 <p className="mt-1 text-navy-900/80 text-[14px] leading-[1.8]">{s.desc}</p>
               </div>
-            </li>
+            </Reveal>
           ))}
         </ol>
 
