@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import ChapterHeader from '../ChapterHeader'
-import BackToHub from '../BackToHub'
+import SectionShell from '../SectionShell'
 import ComingSoonCard from '../ComingSoonCard'
-import VideoPlayer from '../../ui/VideoPlayer'
+import TabBar from '../TabBar'
+import VideoCard from '../VideoCard'
 
 /**
  * 07 プラン — 合言葉ロックの状態機械（§8）。
@@ -79,20 +79,15 @@ export default function PlanSection({ openVideos = [] }) {
 
   const shorts = planVideos.filter((v) => v.variant === 'short')
   const longs = planVideos.filter((v) => v.variant === 'long')
+  const tabVideos = tab === 'short' ? shorts : longs
 
   return (
-    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
-      <div className="md:max-w-[680px] md:mx-auto">
-        <ChapterHeader num="07" title="プラン" />
-
+    <SectionShell num="07" title="プラン">
         {/* 上半分（locked でも開放）: ショート＋プラン概要 */}
         {openVideos.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 mb-2">
             {openVideos.map((v) => (
-              <div key={v.id}>
-                <VideoPlayer videoId={v.youtube_id} title={v.title} />
-                <p className="mt-2 text-navy-900 text-[14px] font-medium">{v.title}</p>
-              </div>
+              <VideoCard key={v.id} video={v} />
             ))}
           </div>
         ) : (
@@ -151,40 +146,23 @@ export default function PlanSection({ openVideos = [] }) {
         ) : (
           /* ── unlocked: ショート/ロング タブ ── */
           <div className="mt-6 animate-[fadeIn_250ms_ease-out]">
-            <div className="flex gap-4 border-b border-navy-200 mb-5">
-              {[
-                { k: 'short', label: 'ショート' },
-                { k: 'long', label: 'ロング' },
-              ].map((t) => (
-                <button
-                  key={t.k}
-                  type="button"
-                  onClick={() => setTab(t.k)}
-                  className={`pb-2 text-[14px] font-semibold border-b-2 -mb-px transition-colors ${
-                    tab === t.k ? 'border-gold-400 text-navy-900' : 'border-transparent text-navy-400'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            <TabBar
+              tabs={[
+                { key: 'short', label: 'ショート' },
+                { key: 'long', label: 'ロング' },
+              ]}
+              active={tab}
+              onChange={setTab}
+            />
             <div key={tab} className="grid grid-cols-1 gap-4 animate-fade-in">
-              {(tab === 'short' ? shorts : longs).length > 0 ? (
-                (tab === 'short' ? shorts : longs).map((v) => (
-                  <div key={v.id}>
-                    <VideoPlayer videoId={v.youtube_id} title={v.title} />
-                    <p className="mt-2 text-navy-900 text-[14px] font-medium">{v.title}</p>
-                  </div>
-                ))
+              {tabVideos.length > 0 ? (
+                tabVideos.map((v) => <VideoCard key={v.id} video={v} />)
               ) : (
                 <ComingSoonCard title={tab === 'short' ? 'ショートプラン動画' : 'ロングプラン動画'} month="6月" />
               )}
             </div>
           </div>
         )}
-
-        <BackToHub />
-      </div>
-    </section>
+    </SectionShell>
   )
 }

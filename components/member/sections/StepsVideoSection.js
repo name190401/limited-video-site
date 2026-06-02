@@ -1,8 +1,8 @@
-import ChapterHeader from '../ChapterHeader'
-import BackToHub from '../BackToHub'
+import SectionShell from '../SectionShell'
 import ComingSoonCard from '../ComingSoonCard'
 import VideoPlayer from '../../ui/VideoPlayer'
-import Reveal from '../Reveal'
+import StepChain from '../StepChain'
+import PillButton from '../PillButton'
 
 /**
  * 11 登録の流れ / 12 使い方（§6）。
@@ -18,43 +18,22 @@ import Reveal from '../Reveal'
 export default function StepsVideoSection({ num, title, steps = [], video = null, cta }) {
   const ready = video?.youtube_id
   return (
-    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
-      <div className="md:max-w-[680px] md:mx-auto">
-        <ChapterHeader num={num} title={title} />
+    <SectionShell num={num} title={title}>
+      <div className="max-w-[640px] mx-auto">
+        {ready ? (
+          <VideoPlayer videoId={video.youtube_id} title={video.title || title} />
+        ) : (
+          <ComingSoonCard title={`${title}の動画`} month="6月" />
+        )}
 
-        <div className="max-w-[640px] mx-auto">
-          {ready ? (
-            <VideoPlayer videoId={video.youtube_id} title={video.title || title} />
-          ) : (
-            <ComingSoonCard title={`${title}の動画`} month="6月" />
-          )}
+        {steps.length > 0 && <StepChain steps={steps} size="sm" className="mt-6" />}
 
-          {steps.length > 0 && (
-            <ol className="step-chain step-chain--sm mt-6 space-y-4">
-              {steps.map((s, i) => (
-                <Reveal as="li" key={i} delay={i * 70} className="flex gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-full border border-gold-400 text-gold-600 font-serif flex items-center justify-center bg-[#EEF2FB]">
-                    {i + 1}
-                  </span>
-                  <div className="pt-0.5">
-                    <p className="font-semibold text-navy-900 text-[15px]">{s.label}</p>
-                    {s.desc && <p className="mt-0.5 text-navy-900/80 text-[14px] leading-[1.8]">{s.desc}</p>}
-                  </div>
-                </Reveal>
-              ))}
-            </ol>
-          )}
-
-          {cta && (
-            <div className="mt-8 text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-gold-400 text-gold-600 font-semibold text-[14px] px-6 py-3">
-                {cta}
-              </span>
-            </div>
-          )}
-        </div>
-        <BackToHub />
+        {cta && (
+          <div className="mt-8 text-center">
+            <PillButton>{cta}</PillButton>
+          </div>
+        )}
       </div>
-    </section>
+    </SectionShell>
   )
 }

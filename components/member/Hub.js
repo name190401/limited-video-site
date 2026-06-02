@@ -1,4 +1,6 @@
 import SectionIcon from './SectionIcon'
+import SoonPill from './SoonPill'
+import { pad2 } from '@/lib/format'
 
 /** 公開予定月の極小表示用（key→月）。準備中タイルにのみ出す。後で管理画面/DBに移せる。 */
 const PLANNED_MONTH = {
@@ -11,10 +13,6 @@ const PLANNED_MONTH = {
   training: '7月',
   registration: '6月',
   how_to_use: '6月',
-}
-
-function pad(n) {
-  return String(n).padStart(2, '0')
 }
 
 /**
@@ -34,7 +32,7 @@ export default function Hub({ sections }) {
         </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {sections.map((s) => {
-            const num = pad(s.sort_order)
+            const num = pad2(s.sort_order)
             const soon = s.status === 'coming_soon'
             const isPlan = s.key === 'plan'
             return (
@@ -59,9 +57,7 @@ export default function Hub({ sections }) {
                 <span className="font-serifjp font-semibold text-navy-900 text-[14px] leading-snug">{s.title}</span>
                 {soon && (
                   <div className="mt-auto flex items-center justify-between">
-                    <span className="inline-block border border-gold-500 text-gold-700 text-[10px] font-medium tracking-[0.14em] rounded-full px-2.5 py-0.5">
-                      準備中
-                    </span>
+                    <SoonPill />
                     {PLANNED_MONTH[s.key] && (
                       <span className="text-navy-400 text-[11px] tracking-[0.04em]">{PLANNED_MONTH[s.key]}</span>
                     )}

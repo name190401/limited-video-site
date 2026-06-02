@@ -9,6 +9,8 @@
  * @param {object} owner     - { name, photo_url } 担当（任意・08等）
  * @param {boolean} compact  - 横スクロールストリップ用の固定幅カード
  */
+import SoonPill from './SoonPill'
+
 export default function ComingSoonCard({ title, month, owner, compact = false }) {
   return (
     <div
@@ -17,7 +19,7 @@ export default function ComingSoonCard({ title, month, owner, compact = false })
         compact ? 'shrink-0 w-44' : 'w-full'
       }`}
     >
-      <span className="inline-block border border-gold-500 text-gold-700 text-[10px] font-medium tracking-[0.14em] rounded-full px-2.5 py-0.5">準備中</span>
+      <SoonPill />
       <p className="mt-2.5 font-serifjp font-semibold text-navy-900 text-[15px] leading-snug">{title}</p>
       {month && <p className="mt-1 text-navy-400 text-[12px] tracking-[0.04em]">{month}公開予定</p>}
       {owner?.name && (

@@ -1,6 +1,6 @@
-import ChapterHeader from '../ChapterHeader'
-import BackToHub from '../BackToHub'
+import SectionShell from '../SectionShell'
 import ComingSoonCard from '../ComingSoonCard'
+import PillButton from '../PillButton'
 
 /**
  * 06 Instagram 導線（§6）。
@@ -12,39 +12,28 @@ import ComingSoonCard from '../ComingSoonCard'
  */
 export default function InstagramSection({ igUrl, posts = [] }) {
   return (
-    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
-      <div className="md:max-w-[680px] md:mx-auto">
-        <ChapterHeader num="06" title="Instagram" />
-
-        {igUrl ? (
-          <>
-            {posts.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {posts.slice(0, 3).map((p, i) => (
-                  <a key={i} href={p.url || igUrl} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden border border-navy-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  </a>
-                ))}
-              </div>
-            )}
-            <div className="text-center">
-              <a
-                href={igUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-gold-400 text-gold-600 font-semibold text-[14px] px-6 py-3"
-              >
-                Instagram を見る
-              </a>
+    <SectionShell num="06" title="Instagram">
+      {igUrl ? (
+        <>
+          {posts.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {posts.slice(0, 3).map((p, i) => (
+                <a key={i} href={p.url || igUrl} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden border border-navy-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </a>
+              ))}
             </div>
-          </>
-        ) : (
-          <ComingSoonCard title="Instagram 連携" month="6月" />
-        )}
-
-        <BackToHub />
-      </div>
-    </section>
+          )}
+          <div className="text-center">
+            <PillButton href={igUrl} target="_blank" rel="noopener noreferrer">
+              Instagram を見る
+            </PillButton>
+          </div>
+        </>
+      ) : (
+        <ComingSoonCard title="Instagram 連携" month="6月" />
+      )}
+    </SectionShell>
   )
 }

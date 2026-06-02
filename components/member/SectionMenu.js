@@ -1,10 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
-function pad(n) {
-  return String(n).padStart(2, '0')
-}
+import { pad2 } from '@/lib/format'
 
 /**
  * 右上常駐ハンバーガー（§5）。
@@ -40,7 +37,7 @@ export default function SectionMenu({ sections }) {
     }
   }, [open])
 
-  const currentTitle = sections.find((s) => pad(s.sort_order) === current)?.title
+  const currentTitle = sections.find((s) => pad2(s.sort_order) === current)?.title
 
   function jump(num) {
     setOpen(false)
@@ -93,7 +90,7 @@ export default function SectionMenu({ sections }) {
             </button>
             <ul className="space-y-1">
               {sections.map((s) => {
-                const num = pad(s.sort_order)
+                const num = pad2(s.sort_order)
                 const soon = s.status === 'coming_soon'
                 const active = current === num
                 return (

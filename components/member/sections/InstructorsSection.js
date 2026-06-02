@@ -1,8 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import ChapterHeader from '../ChapterHeader'
-import BackToHub from '../BackToHub'
+import SectionShell from '../SectionShell'
 
 /**
  * 02 講師紹介（§6）。
@@ -27,10 +26,7 @@ export default function InstructorsSection({ instructors = [] }) {
   const filtered = filter === 'all' ? rest : rest.filter((i) => (i.attribute_tags || []).includes(filter))
 
   return (
-    <section className="relative section-surface section-divider px-5 py-14 md:px-10">
-      <div className="md:max-w-[680px] md:mx-auto">
-        <ChapterHeader num="02" title="講師紹介" />
-
+    <SectionShell num="02" title="講師紹介">
         {/* 主役カード */}
         {lead && (
           <div className="flex flex-col items-center text-center mb-10">
@@ -120,9 +116,6 @@ export default function InstructorsSection({ instructors = [] }) {
         ) : (
           <p className="text-navy-400 text-[13px] text-center">講師を順次ご紹介します。</p>
         )}
-
-        <BackToHub />
-      </div>
-    </section>
+    </SectionShell>
   )
 }
