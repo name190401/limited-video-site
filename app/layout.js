@@ -6,6 +6,12 @@ export const metadata = {
   robots: { index: false, follow: false },
 }
 
+// スマホ縦最優先のモバイルファースト。viewport を明示（Next.js 14 推奨）。
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">

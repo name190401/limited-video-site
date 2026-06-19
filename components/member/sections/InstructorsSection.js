@@ -1,121 +1,117 @@
-'use client'
-
-import { useMemo, useState } from 'react'
 import SectionShell from '../SectionShell'
 
 /**
- * 02 講師紹介（§6）。
- * 主役 石井諒 の単独カード（丸128px・金2pxリング・castle講師ラベル・プロフィール）→
- * 属性フィルタ横スクロール金チップ → 講師丸写真グリッド（石壁テクスチャ背景）。
- * 丸タップで bio アコーディオン展開（画面遷移なし）。写真未登録者は金破線＋準備中。
+ * 02 講師紹介。
+ * 主役 石井諒（写真未提供）= 上質なヒーロー帯（モノグラム＋castle講師＋プロフィール常時表示）。
+ * 提供メンバー = 大判ポートレートのストーリーカード（写真に氏名オーバーレイ＋下に物語を常時表示）。
+ * モバイル1列 / sm 以上 2列。写真は aspect-[4/5]・object-top で顔が見切れない。
+ * 明るい section 地に、紺カード×金枠を浮かせる紺×金ラグジュアリー構成。
  *
  * @param {Array} instructors  type='lecturer' の講師（sort_order 順）
  */
 export default function InstructorsSection({ instructors = [] }) {
   const lead = instructors[0]
   const rest = instructors.slice(1)
-  const [filter, setFilter] = useState('all')
-  const [openId, setOpenId] = useState(null)
-
-  const tags = useMemo(() => {
-    const set = new Set()
-    rest.forEach((i) => (i.attribute_tags || []).forEach((t) => set.add(t)))
-    return ['all', ...Array.from(set)]
-  }, [rest])
-
-  const filtered = filter === 'all' ? rest : rest.filter((i) => (i.attribute_tags || []).includes(filter))
 
   return (
     <SectionShell num="02" title="講師紹介">
-        {/* 主役カード */}
-        {lead && (
-          <div className="flex flex-col items-center text-center mb-10">
-            <span className="rounded-full p-px gold-hairline" style={{ boxShadow: '0 8px 24px -8px rgba(12,21,48,0.5)' }}>
-              {lead.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={lead.photo_url} alt={lead.name} className="block w-32 h-32 rounded-full object-cover" />
-              ) : (
-                <span className="w-32 h-32 rounded-full bg-navy-800 flex items-center justify-center text-gold-300 font-cinzel text-3xl">
-                  {lead.name?.[0]}
-                </span>
-              )}
-            </span>
-            <p className="mt-4 font-serifjp text-[22px] text-navy-900">{lead.name}</p>
-            <span className="mt-1 text-gold-600 text-[11px] font-medium tracking-[0.12em]">castle 講師</span>
-            <span className="mt-0.5 font-cormorant text-gold-500 text-[10px] tracking-[0.34em] [font-variant:small-caps]">CASTLE INSTRUCTOR</span>
-            {(lead.region || lead.age) && (
-              <p className="mt-1 text-navy-400 text-[12px]">
-                {lead.region}
-                {lead.region && lead.age ? '・' : ''}
-                {lead.age ? `${lead.age}歳` : ''}
-              </p>
+      {/* 主役（castle 講師） */}
+      {lead && (
+        <div
+          className="mb-9 overflow-hidden rounded-2xl border border-gold-500/30 bg-navy-800"
+          style={{ boxShadow: '0 20px 44px -24px rgba(12,21,48,0.55)' }}
+        >
+          <div className="flex items-center gap-4 p-5">
+            {lead.photo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={lead.photo_url}
+                alt={lead.name}
+                loading="lazy"
+                decoding="async"
+                className="h-24 w-24 shrink-0 rounded-xl object-cover object-top ring-1 ring-gold-500/40"
+              />
+            ) : (
+              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-gold-500/50 bg-navy-900 font-cinzel text-4xl text-gold-300">
+                {lead.name?.[0]}
+              </span>
             )}
-            {lead.profile && (
-              <p className="mt-3 max-w-[560px] text-navy-900/80 text-[14px] leading-[1.8]">{lead.profile}</p>
-            )}
-          </div>
-        )}
-
-        {/* 属性フィルタチップ */}
-        {tags.length > 1 && (
-          <div className="scroll-strip flex gap-2 overflow-x-auto pb-2 mb-4">
-            {tags.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setFilter(t)}
-                className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold tracking-[0.04em] border transition-colors ${
-                  filter === t
-                    ? 'bg-gold-400 border-gold-400 text-navy-900'
-                    : 'border-gold-400 text-gold-600'
-                }`}
-              >
-                {t === 'all' ? '全員' : t}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* 講師グリッド（石壁テクスチャ背景） */}
-        {rest.length > 0 ? (
-          <div className="stone-texture rounded-xl p-5">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {filtered.map((i) => {
-                const open = openId === i.id
-                const hasPhoto = !!i.photo_url
-                return (
-                  <div key={i.id} className="flex flex-col items-center text-center">
-                    <button
-                      type="button"
-                      onClick={() => setOpenId(open ? null : i.id)}
-                      className="flex flex-col items-center"
-                    >
-                      {hasPhoto ? (
-                        <span className="rounded-full p-px gold-hairline">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={i.photo_url} alt={i.name} className="block w-20 h-20 rounded-full object-cover" />
-                        </span>
-                      ) : (
-                        <span className="w-20 h-20 rounded-full border border-dashed border-gold-400 bg-navy-900/40 flex items-center justify-center text-gold-300 font-cinzel text-lg">
-                          {i.name?.[0]}
-                        </span>
-                      )}
-                      <span className="mt-2 text-white text-[13px] font-medium">{i.name}</span>
-                      {!hasPhoto && <span className="text-gold-400 text-[10px] tracking-[0.1em]">準備中</span>}
-                    </button>
-                    {open && i.profile && (
-                      <p className="mt-2 text-navy-100 text-[12px] leading-relaxed bg-navy-900/50 rounded-lg p-2 w-full">
-                        {i.profile}
-                      </p>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="min-w-0">
+              <span className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
+                CASTLE INSTRUCTOR
+              </span>
+              <h3 className="mt-0.5 font-serifjp text-[23px] leading-tight text-white">{lead.name}</h3>
+              <span className="text-gold-300 text-[12px] tracking-[0.1em]">
+                castle 講師
+                {lead.region ? `・${lead.region}` : ''}
+                {lead.age ? `・${lead.age}歳` : ''}
+              </span>
             </div>
           </div>
-        ) : (
-          <p className="text-navy-400 text-[13px] text-center">講師を順次ご紹介します。</p>
-        )}
+          {lead.profile && (
+            <p className="whitespace-pre-line border-t border-gold-500/20 px-5 py-4 text-[14px] leading-[1.95] text-navy-100">
+              {lead.profile}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* 提供メンバー = ストーリーカード（写真大・プロフィール常時表示） */}
+      {rest.length > 0 ? (
+        <>
+          <div className="mb-4 flex items-center gap-3">
+            <span className="h-px flex-1 bg-gold-500/30" />
+            <span className="font-cormorant text-gold-600 text-[12px] tracking-[0.3em] [font-variant:small-caps]">
+              QUALIA Members
+            </span>
+            <span className="h-px flex-1 bg-gold-500/30" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {rest.map((i) => (
+              <article
+                key={i.id}
+                className="group overflow-hidden rounded-2xl border border-gold-500/30 bg-navy-800 transition-transform duration-300 hover:-translate-y-0.5"
+                style={{ boxShadow: '0 16px 38px -24px rgba(12,21,48,0.6)' }}
+              >
+                {/* ポートレート（顔が見切れないよう縦長＋object-top） */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-navy-900">
+                  {i.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={i.photo_url}
+                      alt={i.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center font-cinzel text-6xl text-gold-300/60">
+                      {i.name?.[0]}
+                    </span>
+                  )}
+                  {/* 紺のウォッシュ：ソース写真ごとの背景差を吸収しブランド統一（顔は薄く保つ） */}
+                  <div className="pointer-events-none absolute inset-0 bg-navy-800/18 mix-blend-multiply" />
+                  {/* 下部グラデーション＋氏名オーバーレイ */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-900 via-navy-900/80 to-transparent px-4 pb-3 pt-16">
+                    <span className="mb-2 block h-px w-9 bg-gold-400" />
+                    <h3 className="font-serifjp text-[21px] leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+                      {i.name}
+                    </h3>
+                  </div>
+                </div>
+                {/* 物語（常時表示・改行保持） */}
+                {i.profile && (
+                  <p className="whitespace-pre-line px-4 py-4 text-[13.5px] leading-[1.9] text-navy-100">
+                    {i.profile}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-navy-400 text-[13px] text-center">講師を順次ご紹介します。</p>
+      )}
     </SectionShell>
   )
 }
