@@ -29,6 +29,9 @@
 
 /* ワードマーク立体感（drop-shadowはclip-textに乗る／text-shadowは乗らない） */
 .wordmark {
+  /* QUALIA ワードマークの寸法（hero / enter で共通） */
+  font-size: clamp(40px, 11.2vw, 56px);
+  letter-spacing: 0.14em;
   filter:
     drop-shadow(0 1px 0 rgba(255, 255, 255, 0.30))
     drop-shadow(0 2px 3px rgba(12, 21, 48, 0.55));
@@ -128,31 +131,6 @@ h1, h2, h3 {
 .scroll-strip::-webkit-scrollbar-thumb {
   background: rgba(212, 175, 55, 0.4);
   border-radius: 2px;
-}
-
-/* Gold gradient utility */
-.text-gold-gradient {
-  background: linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.bg-gold-gradient {
-  background: linear-gradient(135deg, #D4AF37 0%, #C5A55A 50%, #A68A3E 100%);
-}
-
-.border-gold-gradient {
-  border-image: linear-gradient(135deg, #D4AF37, #F5E6A3, #D4AF37) 1;
-}
-
-/* Subtle glow effect */
-.glow-gold {
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
-}
-
-.glow-gold-hover:hover {
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
 }
 
 /* 07 unlocked の解除アニメ（§8: fade-in + translateY, 250ms ease-out） */

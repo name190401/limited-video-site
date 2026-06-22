@@ -11,6 +11,7 @@
  * @param {boolean} onGradient - グラデ地（紺）の上に置くか。既定は薄地。
  */
 import Reveal from './Reveal'
+import DividerWithDiamond from './DividerWithDiamond'
 
 const EYEBROW = {
   '01': 'ORIGIN',
@@ -34,11 +35,7 @@ export default function ChapterHeader({ num, title, badge, eyebrow, onGradient =
     <div id={`sec-${num}`} data-section={num} className="scroll-anchor pt-8 pb-3 mb-6">
       <Reveal>
       {/* 金ヘアライン罫＋中央菱形オーナメント */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        <span className="h-px w-10 gold-hairline" />
-        <span className="w-1 h-1 rotate-45 bg-gold-400" />
-        <span className="h-px w-10 gold-hairline" />
-      </div>
+      <DividerWithDiamond className="mb-6" />
 
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">

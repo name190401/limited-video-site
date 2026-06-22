@@ -37,10 +37,7 @@ export default function EnterPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-b from-navy-900 via-navy-700 to-navy-800">
       <div className="w-full max-w-sm text-center">
-        <h1
-          className="wordmark gold-clip font-cinzel font-semibold leading-none"
-          style={{ fontSize: 'clamp(40px, 11.2vw, 56px)', letterSpacing: '0.14em' }}
-        >
+        <h1 className="wordmark gold-clip font-cinzel font-semibold leading-none">
           QUALIA
         </h1>
         <p className="mt-3 font-cormorant italic text-gold-300 text-[12px] tracking-[0.34em] [font-variant:small-caps]">

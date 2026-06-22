@@ -39,8 +39,7 @@ export default function Hub({ sections }) {
               <a
                 key={s.key}
                 href={`#sec-${num}`}
-                style={{ boxShadow: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)' }}
-                className={`tile-glow relative flex flex-col gap-2 rounded-xl border border-gold-400/50 bg-white p-3.5 min-h-[96px] transition-[transform,opacity] hover:-translate-y-0.5 ${
+                className={`tile-glow shadow-card relative flex flex-col gap-2 rounded-xl border border-gold-400/50 bg-white p-3.5 min-h-[96px] transition-[transform,opacity] hover:-translate-y-0.5 ${
                   soon ? 'opacity-70' : ''
                 }`}
               >

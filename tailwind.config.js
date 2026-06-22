@@ -61,6 +61,10 @@ module.exports = {
         'fade-in': 'fade-in 220ms ease-out both',
         shimmer: 'shimmer 1.4s linear infinite',
       },
+      boxShadow: {
+        // Hub タイル・準備中カードの共通カゲ
+        card: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)',
+      },
     },
   },
   plugins: [],

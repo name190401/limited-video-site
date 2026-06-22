@@ -5,6 +5,7 @@ import SectionShell from '../SectionShell'
 import ComingSoonCard from '../ComingSoonCard'
 import TabBar from '../TabBar'
 import VideoCard from '../VideoCard'
+import DividerWithDiamond from '../DividerWithDiamond'
 
 /**
  * 07 プラン — 合言葉ロックの状態機械（§8）。
@@ -99,11 +100,7 @@ export default function PlanSection({ openVideos = [] }) {
         {!unlocked ? (
           /* ── locked: 金1px 区切り線 ＋ ハードカットのゲートブロック ── */
           <div className="mt-6">
-            <div className="flex items-center justify-center gap-2">
-              <span className="h-px w-10 gold-hairline" />
-              <span className="w-1 h-1 rotate-45 bg-gold-400" />
-              <span className="h-px w-10 gold-hairline" />
-            </div>
+            <DividerWithDiamond />
             <div
               className="relative mt-4 rounded-xl px-6 py-12 text-center overflow-hidden"
               style={{ background: 'radial-gradient(120% 80% at 50% 0%, #1B2A52, #0C1530)' }}

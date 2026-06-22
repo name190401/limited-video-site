@@ -14,8 +14,7 @@ import SoonPill from './SoonPill'
 export default function ComingSoonCard({ title, month, owner, compact = false }) {
   return (
     <div
-      style={{ boxShadow: '0 1px 2px rgba(12,21,48,0.05), 0 10px 24px -14px rgba(12,21,48,0.18)' }}
-      className={`relative rounded-xl border border-gold-400/50 bg-navy-50 p-4 opacity-80 ${
+      className={`shadow-card relative rounded-xl border border-gold-400/50 bg-navy-50 p-4 opacity-80 ${
         compact ? 'shrink-0 w-44' : 'w-full'
       }`}
     >

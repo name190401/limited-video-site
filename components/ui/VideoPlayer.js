@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+const EMBED_BASE = 'https://www.youtube-nocookie.com/embed/'
 const EMBED_PARAMS = 'modestbranding=1&rel=0&showinfo=0&cc_load_policy=0'
 
 /**
@@ -33,7 +34,7 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
         onContextMenu={(e) => e.preventDefault()}
       >
         <iframe
-          src={`https://www.youtube-nocookie.com/embed/${videoId}?${EMBED_PARAMS}&autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&playsinline=1`}
+          src={`${EMBED_BASE}${videoId}?${EMBED_PARAMS}&autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&playsinline=1`}
           width="100%"
           height="100%"
           allow="autoplay; encrypted-media"
@@ -95,7 +96,7 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
         onContextMenu={(e) => e.preventDefault()}
       >
         <iframe
-          src={`https://www.youtube-nocookie.com/embed/${videoId}?${EMBED_PARAMS}&autoplay=1`}
+          src={`${EMBED_BASE}${videoId}?${EMBED_PARAMS}&autoplay=1`}
           width="100%"
           height="100%"
           allow="accelerometer; autoplay; encrypted-media; gyroscope"

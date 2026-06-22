@@ -18,10 +18,7 @@ export default function Hero({ lead }) {
       {/* 上端ハイライト（金ヘアライン） */}
       <span className="absolute inset-x-0 top-0 h-px gold-hairline" />
 
-      <h1
-        className="wordmark gold-clip font-cinzel font-semibold leading-none"
-        style={{ fontSize: 'clamp(40px, 11.2vw, 56px)', letterSpacing: '0.14em' }}
-      >
+      <h1 className="wordmark gold-clip font-cinzel font-semibold leading-none">
         QUALIA
       </h1>
 
