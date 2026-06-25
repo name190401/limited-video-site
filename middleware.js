@@ -37,5 +37,5 @@ export async function middleware(request) {
 
 export const config = {
   // 静的アセット・画像・favicon・robots・api を除く全ルートを保護
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|robots.txt|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|robots.txt|brand/|api/).*)'],
 };
