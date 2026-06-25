@@ -37,6 +37,15 @@ export default function EnterPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-b from-navy-900 via-navy-700 to-navy-800">
       <div className="w-full max-w-sm text-center">
+        {/* castle 紋章シール（白単色・入口の紋章） */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/castle-crest-white.png"
+          alt="Castle — Team Ryo Ishii"
+          width="116"
+          height="127"
+          className="mx-auto mb-7 w-[116px] h-auto"
+        />
         <h1 className="wordmark gold-clip font-cinzel font-semibold leading-none">
           QUALIA
         </h1>
