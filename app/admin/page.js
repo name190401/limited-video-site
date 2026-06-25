@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
 import { getPasswordsForDays } from '@/lib/password'
 import { getSitePassword } from '@/lib/settings'
-import AdminLogin from '@/components/admin/AdminLogin'
 import AdminDashboard from '@/components/admin/AdminDashboard'
 
 // 日付・日替わりコードは毎リクエスト最新（キャッシュしない）。
@@ -14,8 +14,8 @@ export const metadata = {
 }
 
 /**
- * 管理画面（/admin）。middleware で Layer1 免除 → ここで ADMIN_PASSWORD ゲート。
- * 未ログイン: ログインフォーム。ログイン済: 日替わりパスコード一覧＋会員合言葉。
+ * 管理画面（/admin）。ログイン入口は /enter に一本化したため、ここは単独ログインを持たない。
+ * Admin Cookie 未所持なら /enter へ送る（統一ログインで管理者PWを入れると Admin Cookie が付く）。
  * 日替わりコードは PASSWORD_SECRET_KEY ＋ JST日付から決定的に算出（DB不要）。
  */
 export default async function AdminPage() {
@@ -23,7 +23,7 @@ export default async function AdminPage() {
   const authed = await verifyAdminCookieValue(token)
 
   if (!authed) {
-    return <AdminLogin />
+    redirect('/enter')
   }
 
   // 今日＋今後6日（計7日）の Layer2 日替わりコード（グループ0）。

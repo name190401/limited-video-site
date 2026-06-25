@@ -10,7 +10,7 @@ import { pad2 } from '@/lib/format'
  *   準備中項目=金ピル＋opacity0.7。現在地=金ハイライト。
  * - IntersectionObserver で現在セクションを検出。
  */
-export default function SectionMenu({ sections }) {
+export default function SectionMenu({ sections, isAdmin = false }) {
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState(null)
 
@@ -116,6 +116,20 @@ export default function SectionMenu({ sections }) {
                 )
               })}
             </ul>
+
+            {/* 管理者のみ：管理者ページへの導線（統一ログインで管理者PWを入れた人だけ表示） */}
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="mt-6 flex items-center gap-3 border-t border-gold-400/30 pt-5"
+              >
+                <span className="text-[12px] font-bold tracking-[0.12em] text-gold-400">★</span>
+                <span className="flex-1 text-[16px] font-semibold text-gold-300">管理者ページ</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M5 3l4 4-4 4" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            )}
           </nav>
         </div>
       )}

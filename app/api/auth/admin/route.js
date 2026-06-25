@@ -1,29 +1,18 @@
 import { NextResponse } from 'next/server';
-import { verifyAdminPassword } from '@/lib/auth/server';
-import { handlePasswordAuth } from '@/lib/auth/password-route';
-import { ADMIN_COOKIE, issueAdminCookieValue, adminCookieOptions } from '@/lib/auth/admin';
+import { ADMIN_COOKIE, adminCookieOptions } from '@/lib/auth/admin';
+import { LAYER1_COOKIE, layer1CookieOptions } from '@/lib/auth/layer1';
 
 export const runtime = 'nodejs';
 
 /**
- * 管理画面ログイン。ADMIN_PASSWORD を照合し、成功で qualia_admin httpOnly Cookie を発行。
- * レート制限（10回/15分→429）含む共通フローは handlePasswordAuth を参照。
+ * ログアウト（統一）。管理画面の「ログアウト」から呼ばれ、会員(Layer1)・管理(Admin)の
+ * 両 Cookie を破棄する。
+ * ※ログイン入口は /enter に一本化したため、ここはログイン POST を持たない
+ *   （管理者PWは /enter → /api/auth/layer1 が判定し Admin Cookie も併せて発行する）。
  */
-export async function POST(request) {
-  return handlePasswordAuth(request, {
-    scope: 'admin',
-    max: 10,
-    windowMin: 15,
-    verify: verifyAdminPassword,
-    cookieName: ADMIN_COOKIE,
-    issueCookieValue: issueAdminCookieValue,
-    cookieOptions: adminCookieOptions,
-  });
-}
-
-/** 管理画面ログアウト（Cookie 破棄）。 */
 export async function DELETE() {
   const res = NextResponse.json({ success: true });
   res.cookies.set(ADMIN_COOKIE, '', { ...adminCookieOptions(), maxAge: 0 });
+  res.cookies.set(LAYER1_COOKIE, '', { ...layer1CookieOptions(), maxAge: 0 });
   return res;
 }

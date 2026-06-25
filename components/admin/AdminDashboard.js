@@ -50,8 +50,8 @@ export default function AdminDashboard({ days, sitePassword }) {
   const logout = async () => {
     setLoggingOut(true)
     try {
-      await fetch('/api/auth/admin', { method: 'DELETE' })
-      router.refresh()
+      await fetch('/api/auth/admin', { method: 'DELETE' }) // 会員/管理 両Cookieを破棄
+      router.replace('/enter')
     } finally {
       setLoggingOut(false)
     }
@@ -68,14 +68,22 @@ export default function AdminDashboard({ days, sitePassword }) {
               Admin
             </p>
           </div>
-          <button
-            type="button"
-            onClick={logout}
-            disabled={loggingOut}
-            className="rounded-lg border border-gold-400/30 px-3 py-1.5 text-[12px] font-sansjp text-navy-100 transition-colors hover:border-gold-400/60 hover:text-white disabled:opacity-50"
-          >
-            {loggingOut ? '…' : 'ログアウト'}
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="/"
+              className="rounded-lg border border-gold-400/30 px-3 py-1.5 text-[12px] font-sansjp text-navy-100 transition-colors hover:border-gold-400/60 hover:text-white"
+            >
+              ← サイトに戻る
+            </a>
+            <button
+              type="button"
+              onClick={logout}
+              disabled={loggingOut}
+              className="rounded-lg border border-gold-400/30 px-3 py-1.5 text-[12px] font-sansjp text-navy-100 transition-colors hover:border-gold-400/60 hover:text-white disabled:opacity-50"
+            >
+              {loggingOut ? '…' : 'ログアウト'}
+            </button>
+          </div>
         </header>
 
         <span className="mt-6 block h-px w-full gold-hairline" />

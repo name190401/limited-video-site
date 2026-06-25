@@ -14,6 +14,8 @@ import ProductsSection from '@/components/member/sections/ProductsSection'
 import TrainingSection from '@/components/member/sections/TrainingSection'
 import StepsVideoSection from '@/components/member/sections/StepsVideoSection'
 import FaqSection from '@/components/member/sections/FaqSection'
+import { cookies } from 'next/headers'
+import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
 
 // 動画が DB から来るため毎リクエスト最新を反映（再デプロイ無しで公開反映）。
 export const dynamic = 'force-dynamic'
@@ -31,12 +33,15 @@ export default async function MemberHome() {
   const v = (key) => videosBySection[key] || []
   const lead = lecturers[0]
 
+  // 統一ログインで管理者PWを入れた人だけ Admin Cookie を持つ → メニューに管理者ページを出す。
+  const isAdmin = await verifyAdminCookieValue(cookies().get(ADMIN_COOKIE)?.value)
+
   const planOpen = v('plan').filter((x) => !x.locked && x.youtube_id) // layer1 のショート等のみ開放
 
   return (
     <>
       <span id="top" />
-      <SectionMenu sections={sections} />
+      <SectionMenu sections={sections} isAdmin={isAdmin} />
       <Hero lead={lead} />
       <Hub sections={sections} />
 
