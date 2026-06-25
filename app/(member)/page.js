@@ -42,12 +42,12 @@ export default async function MemberHome() {
 
       <OriginSection section={byKey.origin} />
       <InstructorsSection instructors={lecturers} />
-      <VideoGridSection num="03" title="耳開け・導入" lead="まずはここから。3 本の導入動画をご覧ください。" videos={v('ear_opening')} month="6月" />
-      <VideoGridSection num="04" title="プラン説明" lead="プランの全体像を 3 本でつかめます。" videos={v('plan_intro')} month="6月" />
+      <VideoGridSection num="03" title="耳開け・導入" lead="まずはここから。各メンバーの導入動画をご覧ください。" videos={v('ear_opening')} month="6月" />
+      <VideoGridSection num="04" title="プラン説明" lead="新規事業説明会の動画です。" videos={v('plan_intro')} desired={2} month="6月" />
       <ClosingSection closers={closers} videos={v('closing')} />
       <InstagramSection igUrl={null} />
       <PlanSection openVideos={planOpen} />
-      <BonusSection section={byKey.bonus} />
+      <BonusSection section={byKey.bonus} videos={v('bonus')} />
       <ProductsSection videos={v('products')} />
       <TrainingSection videos={v('training')} />
       <StepsVideoSection

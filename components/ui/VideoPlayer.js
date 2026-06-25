@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import SitePlayer from './SitePlayer'
 
 const EMBED_BASE = 'https://www.youtube-nocookie.com/embed/'
 const EMBED_PARAMS = 'modestbranding=1&rel=0&showinfo=0&cc_load_policy=0'
@@ -9,14 +11,33 @@ const EMBED_PARAMS = 'modestbranding=1&rel=0&showinfo=0&cc_load_policy=0'
  * 動画プレイヤー（§9 タップ再生方式）。
  *
  * - 既定: サムネ（YouTube hqdefault or 指定 thumbnail）＋ 金リング Play ボタンを表示し、
- *   **初回タップで初めて youtube-nocookie iframe を生成**（autoplay=1）。
- *   → 多数動画の全先読み（eager load）を回避。
- * - muted=true（09 製品ショート）: タップ不要で **ミュート自動ループ** 再生。
+ *   **タップで画面全体を覆うフルスクリーンのライトボックス**を開いて再生する
+ *   （iPhone Safari は任意要素の requestFullscreen 不可のため、ビューポート全面の
+ *   オーバーレイ＝全デバイスで確実に効く方式。YouTube の ⛶ で真の OS 全画面にも行ける）。
+ *   → 多数動画の全先読み（eager load）を回避（開いた時に初めて iframe 生成）。
+ *   閉じる: ×ボタン / 背景タップ / ESC。表示中は背景スクロールをロック。
+ * - muted=true（09 製品ショート）: タップ不要で **ミュート自動ループ** 再生（インライン据置）。
  * - 右クリック抑止（onContextMenu）は維持。
  */
 export default function VideoPlayer({ videoId, title, thumbnail, duration, muted = false }) {
   const [active, setActive] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  // 全画面表示中: ESC で閉じる ＋ 背景スクロールをロック。
+  useEffect(() => {
+    if (!active) return
+    const onKey = (e) => { if (e.key === 'Escape') setActive(false) }
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [active])
 
   if (!videoId) {
     return (
@@ -26,7 +47,7 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
     )
   }
 
-  // 製品ショート: ミュート自動ループ（タップ不要）
+  // 製品ショート: ミュート自動ループ（タップ不要・インライン据置）
   if (muted) {
     return (
       <div
@@ -48,13 +69,49 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
 
   const thumbSrc = thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
 
-  if (!active) {
-    return (
+  // 全画面ライトボックス（body 直下に portal で出す＝カード/section の transform・overflow に影響されない）
+  const overlay =
+    active && mounted
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-navy-900/95 backdrop-blur-sm p-4 sm:p-8 animate-fade-in"
+            onClick={() => setActive(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title || '動画'}
+          >
+            {/* 閉じる × */}
+            <button
+              type="button"
+              onClick={() => setActive(false)}
+              aria-label="閉じる"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-gold-400/60 bg-navy-900/70 text-gold-300 transition-colors hover:bg-navy-800 hover:text-gold-200"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* プレーヤー（16:9・最大幅。動画部のクリックは閉じない・YouTube非依存の自前UI） */}
+            <div
+              className="relative w-full max-w-[1100px] aspect-video overflow-hidden rounded-xl shadow-2xl no-select"
+              onClick={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.preventDefault()}
+            >
+              <SitePlayer videoId={videoId} title={title} />
+            </div>
+          </div>,
+          document.body
+        )
+      : null
+
+  return (
+    <>
       <div className="video-frame relative rounded-xl">
         <button
           type="button"
           onClick={() => setActive(true)}
-          aria-label={`${title || '動画'}を再生`}
+          aria-label={`${title || '動画'}を全画面で再生`}
           className="group aspect-video w-full rounded-xl overflow-hidden relative no-select bg-navy-900 block"
           onContextMenu={(e) => e.preventDefault()}
         >
@@ -86,26 +143,7 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
           )}
         </button>
       </div>
-    )
-  }
-
-  return (
-    <div className="video-frame relative rounded-xl">
-      <div
-        className="aspect-video bg-navy-900 rounded-xl overflow-hidden shadow-lg relative no-select"
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        <iframe
-          src={`${EMBED_BASE}${videoId}?${EMBED_PARAMS}&autoplay=1`}
-          width="100%"
-          height="100%"
-          allow="accelerometer; autoplay; encrypted-media; gyroscope"
-          allowFullScreen
-          style={{ border: 'none' }}
-          title={title || '限定動画'}
-        />
-        <div className="absolute inset-0 z-10" onContextMenu={(e) => e.preventDefault()} style={{ pointerEvents: 'none' }} />
-      </div>
-    </div>
+      {overlay}
+    </>
   )
 }
