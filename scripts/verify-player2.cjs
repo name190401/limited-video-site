@@ -1,6 +1,6 @@
 // カバー方式の3状態検証: 開始直後(カバー) / 定常再生(映像) / 一時停止(カバー)。
 const { chromium } = require('playwright')
-const OUT = '/Users/hajime/Desktop/限定公開'
+const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
 ;(async () => {

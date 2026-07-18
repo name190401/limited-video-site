@@ -1,7 +1,7 @@
 // 全画面ライトボックス＋YouTube非遷移カスタムプレーヤーの検証。headless Chrome 直駆動。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-player.cjs
 const { chromium } = require('playwright')
-const OUT = '/Users/hajime/Desktop/限定公開'
+const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
 ;(async () => {

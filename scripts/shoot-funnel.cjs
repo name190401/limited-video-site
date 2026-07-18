@@ -1,7 +1,7 @@
 // 事業説明ファネル動画（§03/§04/§05/§08）の検証＋スクショ。MCPの5s制限回避＝headless Chrome 直駆動。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/shoot-funnel.cjs [width]
 const { chromium } = require('playwright')
-const OUT = '/Users/hajime/Desktop/限定公開'
+const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
 const EXPECT = {
@@ -57,7 +57,8 @@ const scrollToHeading = (page, text) =>
   const has = (id) => all.includes(id)
 
   report.sections.ear_opening = EXPECT.ear_opening.map((id) => ({ id, found: has(id) }))
-  report.sections.plan_intro = EXPECT.plan_intro.map((id) => ({ id, found: has(id) }))
+  // §04 plan_intro は Layer2 保護化により初期表示では伏せられているのが正（解除後の検証は verify-layer2.cjs）
+  report.sections.plan_intro = EXPECT.plan_intro.map((id) => ({ id, hiddenAsExpected: !has(id) }))
   report.sections.bonus = EXPECT.bonus.map((id) => ({ id, found: has(id) }))
 
   // §05 クロージング: タブを順にクリックして各動画IDを確認

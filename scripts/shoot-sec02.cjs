@@ -2,7 +2,7 @@
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/shoot-sec02.cjs <width>
 // Layer1 を fetch ログインしてから / の §02 を数枚キャプチャ。
 const { chromium } = require('playwright')
-const OUT = '/Users/hajime/Desktop/限定公開'
+const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 
 ;(async () => {
   const width = parseInt(process.argv[2] || '375', 10)
