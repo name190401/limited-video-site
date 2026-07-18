@@ -1,4 +1,5 @@
 import SecurityGuard from '@/components/security/SecurityGuard';
+import CaptureNotice from '@/components/security/CaptureNotice';
 
 export const metadata = {
   title: 'QUALIA',
@@ -11,5 +12,10 @@ export const metadata = {
  * 13 セクションのヘッダ／ハンバーガーは Phase 3 で実装。
  */
 export default function MemberLayout({ children }) {
-  return <SecurityGuard>{children}</SecurityGuard>;
+  return (
+    <SecurityGuard>
+      {children}
+      <CaptureNotice />
+    </SecurityGuard>
+  );
 }

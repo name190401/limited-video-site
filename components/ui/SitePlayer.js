@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { loadYouTubeAPI } from './ytapi'
+import Watermark from '../security/Watermark'
 
 /**
  * YouTube非依存の自前プレーヤー（サイト内完結・YouTube chrome 完全非表示）。
@@ -137,6 +138,9 @@ export default function SitePlayer({ videoId, title }) {
           <span aria-hidden="true" className="absolute inset-0 video-skeleton animate-shimmer opacity-40" />
         )}
       </div>
+
+      {/* 映像・紺カバーの上、クリックシールド・操作UIの下に常時表示 */}
+      <Watermark />
 
       {/* クリックシールド＝タップで再生/一時停止（YouTube へのクリック到達を遮断） */}
       <button

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import SitePlayer from './SitePlayer'
+import Watermark from '../security/Watermark'
 
 const EMBED_BASE = 'https://www.youtube-nocookie.com/embed/'
 const EMBED_PARAMS = 'modestbranding=1&rel=0&showinfo=0&cc_load_policy=0'
@@ -62,6 +63,7 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
           style={{ border: 'none', pointerEvents: 'none' }}
           title={title || '製品ショート'}
         />
+        <Watermark />
         <div className="absolute inset-0 z-10" onContextMenu={(e) => e.preventDefault()} />
       </div>
     )
@@ -94,11 +96,16 @@ export default function VideoPlayer({ videoId, title, thumbnail, duration, muted
 
             {/* プレーヤー（16:9・最大幅。動画部のクリックは閉じない・YouTube非依存の自前UI） */}
             <div
-              className="relative w-full max-w-[1100px] aspect-video overflow-hidden rounded-xl shadow-2xl no-select"
+              className="w-full max-w-[1100px]"
               onClick={(e) => e.stopPropagation()}
               onContextMenu={(e) => e.preventDefault()}
             >
-              <SitePlayer videoId={videoId} title={title} />
+              <div className="relative aspect-video overflow-hidden rounded-xl shadow-2xl no-select">
+                <SitePlayer videoId={videoId} title={title} />
+              </div>
+              <p className="mt-2 text-center text-[11px] text-white/60">
+                ⚠ スクリーンショット・画面録画は禁止されています
+              </p>
             </div>
           </div>,
           document.body
