@@ -45,6 +45,11 @@ export default function SectionMenu({ sections, isAdmin = false }) {
     if (el) el.scrollIntoView({ behavior: 'smooth' })
   }
 
+  async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    window.location.href = '/enter'
+  }
+
   return (
     <>
       {/* 常駐ハンバーガー */}
@@ -130,6 +135,15 @@ export default function SectionMenu({ sections, isAdmin = false }) {
                 </svg>
               </a>
             )}
+
+            <button
+              type="button"
+              onClick={logout}
+              className="mt-5 min-h-11 w-full flex items-center gap-3 border-t border-navy-300/30 pt-5 text-left text-navy-200"
+            >
+              <span className="text-[12px] font-bold tracking-[0.12em]">↪</span>
+              <span className="flex-1 text-[16px] font-medium">ログアウト</span>
+            </button>
           </nav>
         </div>
       )}
