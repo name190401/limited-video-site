@@ -6,10 +6,10 @@ export default function Footer() {
       {/* castle 紋章（producer ブランド・白単色エンブレム／"Castle"文言は produced by castle に一本化） */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/brand/castle-emblem-white.png"
+        src="/brand/castle-emblem-full-white.png"
         alt="Castle — Team Ryo Ishii"
         width="96"
-        height="65"
+        height="79"
         className="mx-auto mt-5 w-[96px] h-auto opacity-95"
       />
       <p className="mt-3 font-cormorant text-navy-300 text-[11px] tracking-[0.34em] [font-variant:small-caps]">produced by castle</p>
