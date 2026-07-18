@@ -110,7 +110,7 @@ export default function AdminDashboard({ days, sitePassword }) {
             </div>
           </div>
           <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
-            プラン説明・プラン・製品・トレーニング（§04・§07・§09・§10）を解除するための6桁コードです。JST 0:00 に自動で切り替わります。
+            プラン説明・製品・トレーニング（§04・§08・§09）を解除するための6桁コードです。JST 0:00 に自動で切り替わります。
           </p>
         </section>
 

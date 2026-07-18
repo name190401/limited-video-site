@@ -8,7 +8,7 @@ import UnlockGate from '../UnlockGate'
 import { usePlanGate } from '../PlanGateProvider'
 
 /**
- * 10 トレーニング（§6）。章扉（件数バッジ）→ 9項目を2列タイルグリッド。
+ * 09 トレーニング（§6）。章扉（件数バッジ）→ 9項目を2列タイルグリッド。
  * 各タイル: 番号＋タイトル＋担当（subtitle）＋状態ピル。公開済はタイル内に動画、準備中はピル＋opacity0.7。
  *
  * @param {Array} videos  section_key='training' の videos（sort_order 順）
@@ -19,7 +19,7 @@ export default function TrainingSection({ videos = [] }) {
   const badge = `公開 ${publishedVideos(mergedVideos).length} / 全 ${mergedVideos.length}`
 
   return (
-    <SectionShell num="10" title="トレーニング" badge={badge}>
+    <SectionShell num="09" title="トレーニング" badge={badge}>
       {status === 'locked' && <UnlockGate />}
       {status === 'checking' && <div className="h-24 rounded-xl bg-navy-100/50 animate-pulse" />}
       {status === 'unlocked' && <div className="grid grid-cols-2 gap-3">
@@ -38,7 +38,7 @@ export default function TrainingSection({ videos = [] }) {
                   </span>
                 )}
               </div>
-              <p className="mt-1.5 font-semibold text-navy-900 text-[14px] leading-snug">{v.title}</p>
+              <p className="mt-1.5 font-semibold text-navy-900 text-[14px] leading-snug break-keep [overflow-wrap:anywhere] [line-break:strict]">{v.title}</p>
               {v.subtitle && <p className="mt-1 text-navy-400 text-[12px]">担当：{v.subtitle}</p>}
               {ready && (
                 <div className="mt-2">

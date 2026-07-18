@@ -1,4 +1,4 @@
-// Layer2 4セクション共有ゲート＋抑止パッケージ＋ログアウトの総合検証。headless Chrome 直駆動。
+// Layer2 3セクション共有ゲート＋公開コンテンツ＋抑止パッケージ＋ログアウトの総合検証。headless Chrome 直駆動。
 // 使い方: QCODE=<当日コード> NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-layer2.cjs [width]
 // 当日コードを渡さない場合は .env.local の PASSWORD_SECRET_KEY から自動算出する。
 const { chromium } = require('playwright')
@@ -8,7 +8,11 @@ const crypto = require('crypto')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
-const PROTECTED_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
+const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
+const PRODUCT_IDS = ['tuSEuVC6SQU', 'PKTwEWA5n3A']
+const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'B_Cd-YQ1h30']
+const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS, ...TRAINING_IDS]
+const BONUS_IDS = ['c8DiLN6lVsY', '1k9wXYFFOVU']
 
 function todayCode() {
   if (process.env.QCODE) return process.env.QCODE
@@ -30,6 +34,16 @@ const idsOnPage = (page) =>
 
 const gateCount = (page) =>
   page.evaluate(() => [...document.querySelectorAll('input[placeholder="合言葉"]')].length)
+
+const sectionInfo = (page, heading) => page.evaluate((text) => {
+  const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes(text))
+  if (!h) return { found: false, ids: [], text: '' }
+  const sec = h.closest('section') || h.parentElement
+  const ids = [...sec.querySelectorAll('img')]
+    .map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1])
+    .filter(Boolean)
+  return { found: true, ids, text: sec.textContent }
+}, heading)
 
 const scrollToHeading = (page, text) =>
   page.evaluate((t) => {
@@ -74,11 +88,17 @@ const shot = async (page, report, tag) => {
   // 1) 初期ペイロードに保護IDが無い
   const html = await page.content()
   const leaked = PROTECTED_IDS.filter((id) => html.includes(id))
-  check('初期ペイロードに保護4IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
+  check('初期ペイロードに保護15IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
 
-  // 2) 未解除でゲート4つ（§04/§07/§09/§10）
+  // 2) 未解除でゲート3つ（§04/§08/§09）
   const gates = await gateCount(page)
-  check('未解除ゲート数=4', gates === 4, `gates=${gates}`)
+  check('未解除ゲート数=3', gates === 3, `gates=${gates}`)
+
+  const bonusLocked = await sectionInfo(page, 'ボーナス（インカム）')
+  const bonusFound = BONUS_IDS.filter((id) => bonusLocked.ids.includes(id))
+  check('§07ボーナスにLayer1動画2本表示', bonusFound.length === 2, `found=${bonusFound.join(',') || 'none'}`)
+  await scrollToHeading(page, 'ボーナス（インカム）'); await page.waitForTimeout(500)
+  await shot(page, report, '07-bonus')
 
   await scrollToHeading(page, 'プラン説明'); await page.waitForTimeout(700)
   await shot(page, report, '04-locked')
@@ -104,55 +124,65 @@ const shot = async (page, report, tag) => {
   await page.waitForTimeout(2500)
 
   const gatesAfter = await gateCount(page)
-  check('解除後ゲート数=0（4セクション同時解除）', gatesAfter === 0, `gates=${gatesAfter}`)
+  check('解除後ゲート数=0（3セクション同時解除）', gatesAfter === 0, `gates=${gatesAfter}`)
 
-  const ids = await idsOnPage(page)
-  const found = PROTECTED_IDS.filter((id) => ids.includes(id))
-  check('§04に4本のポスター表示', found.length === 4, `found=${found.length}/4`)
+  const plan = await sectionInfo(page, 'プラン説明')
+  const planFound = PLAN_IDS.filter((id) => plan.ids.includes(id))
+  const planHeadings = plan.text.includes('ロングバージョン') && plan.text.includes('ショートバージョン')
+  check('§04に4本のポスター＋ロング/ショート見出し', planFound.length === 4 && planHeadings, `found=${planFound.length}/4, headings=${planHeadings}`)
 
   await scrollToHeading(page, 'プラン説明'); await page.waitForTimeout(700)
   await shot(page, report, '04-unlocked')
 
-  // 4) §07/§09/§10 の解除後表示
-  await scrollToHeading(page, 'プラン'); // §07 は「プラン」見出し（プラン説明と別）
-  const sec07 = await page.evaluate(() => {
-    const hs = [...document.querySelectorAll('h1,h2,h3,h4')].filter((e) => /^プラン$/.test(e.textContent.trim()))
-    const h = hs[0]
-    if (!h) return { ok: false }
-    const sec = h.closest('section') || h.parentElement
-    const top = window.scrollY + sec.getBoundingClientRect().top - 8
-    window.scrollTo({ top, behavior: 'instant' })
-    return {
-      ok: true,
-      hasTab: [...sec.querySelectorAll('button')].some((b) => b.textContent.trim() === 'ショート'),
-      hasSoon: sec.textContent.includes('公開予定'),
-    }
-  })
-  check('§07 解除後にショート/ロングタブ表示', !!sec07.hasTab, JSON.stringify(sec07))
-  await page.waitForTimeout(600)
-  await shot(page, report, '07-unlocked')
-
-  const sec09 = await page.evaluate(() => {
+  // 4) §08 製品: パーソナル→プロダクト全14品の両タブ
+  const productPersonal = await page.evaluate(() => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('製品'))
     if (!h) return { ok: false }
     const sec = h.closest('section') || h.parentElement
     window.scrollTo({ top: window.scrollY + sec.getBoundingClientRect().top - 8, behavior: 'instant' })
-    return { ok: true, soonTiles: sec.querySelectorAll('.scroll-strip > *').length, text: sec.textContent.includes('順次公開') }
+    const tabs = [...sec.querySelectorAll('button')].map((b) => b.textContent.trim())
+    const ids = [...sec.querySelectorAll('img')].map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1]).filter(Boolean)
+    return { ok: true, tabs, ids }
   })
-  check('§09 解除後に予告ストリップ表示', sec09.ok && sec09.soonTiles >= 2, JSON.stringify(sec09))
+  const clickedProduct = await page.evaluate(() => {
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('製品'))
+    const sec = h && (h.closest('section') || h.parentElement)
+    const btn = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.trim() === 'プロダクト全14品')
+    if (!btn) return false
+    btn.click(); return true
+  })
   await page.waitForTimeout(600)
-  await shot(page, report, '09-unlocked')
+  const productLong = await sectionInfo(page, '製品')
+  check('§08製品の2タブと各動画サムネイル', productPersonal.tabs?.includes('パーソナル') && productPersonal.ids?.includes(PRODUCT_IDS[0]) && clickedProduct && productLong.ids.includes(PRODUCT_IDS[1]), JSON.stringify({ personal: productPersonal, longIds: productLong.ids }))
+  await shot(page, report, '08-products')
 
-  const sec10 = await page.evaluate(() => {
+  // 5) §09 トレーニング: 準備中なし、公開9本
+  const training = await page.evaluate(() => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('トレーニング'))
     if (!h) return { ok: false }
     const sec = h.closest('section') || h.parentElement
     window.scrollTo({ top: window.scrollY + sec.getBoundingClientRect().top - 8, behavior: 'instant' })
-    return { ok: true, ready: (sec.textContent.match(/準備中/g) || []).length }
+    const ids = [...sec.querySelectorAll('img')].map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1]).filter(Boolean)
+    return { ok: true, ready: (sec.textContent.match(/準備中/g) || []).length, ids }
   })
-  check('§10 解除後に9タイル（準備中）表示', sec10.ok && sec10.ready >= 9, JSON.stringify(sec10))
+  const trainingFound = TRAINING_IDS.filter((id) => training.ids?.includes(id))
+  check('§09トレーニングは準備中0・サムネイル9本', training.ok && training.ready === 0 && trainingFound.length === 9, JSON.stringify({ ready: training.ready, found: trainingFound.length }))
   await page.waitForTimeout(600)
-  await shot(page, report, '10-unlocked')
+  await shot(page, report, '09-training')
+
+  // 6) §10 PDF、§11 Layer1動画
+  await scrollToHeading(page, '登録の流れ'); await page.waitForTimeout(500)
+  const pdf = await page.evaluate(() => {
+    const a = document.querySelector('a[href*="d27rnpuamwvieu.cloudfront.net"]')
+    return { found: !!a, target: a?.getAttribute('target'), href: a?.href }
+  })
+  check('§10登録の流れにCloudFront PDF別タブリンク', pdf.found && pdf.target === '_blank', JSON.stringify(pdf))
+  await shot(page, report, '10-pdf')
+
+  await scrollToHeading(page, 'QUALIA ページの使い方'); await page.waitForTimeout(500)
+  const howTo = await sectionInfo(page, 'QUALIA ページの使い方')
+  check('§11使い方にLayer1動画サムネイル', howTo.ids.includes('jeCttlIq6ss'), howTo.ids.join(',') || 'none')
+  await shot(page, report, '11-how-to')
 
   // 5) ウォーターマーク: §04 の動画を開いてライトボックス内を確認
   await scrollToHeading(page, 'プラン説明'); await page.waitForTimeout(500)

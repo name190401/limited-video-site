@@ -2,23 +2,10 @@ import SectionIcon from './SectionIcon'
 import SoonPill from './SoonPill'
 import { pad2 } from '@/lib/format'
 
-/** 公開予定月の極小表示用（key→月）。準備中タイルにのみ出す。後で管理画面/DBに移せる。 */
-const PLANNED_MONTH = {
-  ear_opening: '6月',
-  plan_intro: '6月',
-  closing: '6月',
-  plan: '6月',
-  bonus: '7月',
-  products: '7月',
-  training: '7月',
-  registration: '6月',
-  how_to_use: '6月',
-}
-
 /**
- * ハブ（§5・hero 直下の核）。13 セクションのタイルグリッド。
+ * ハブ（§5・hero 直下の核）。12 セクションのタイルグリッド。
  * タイルタップ → #sec-NN へ smooth scroll。
- * 準備中タイル=金「準備中」ピル＋opacity0.7＋公開月。07=金鍵（解除後チェックは Phase4 で client 化）。
+ * 準備中タイル=金「準備中」ピル＋opacity0.7。保護3セクション（プラン説明・製品・トレーニング）=金鍵。
  */
 export default function Hub({ sections }) {
   return (
@@ -34,7 +21,7 @@ export default function Hub({ sections }) {
           {sections.map((s) => {
             const num = pad2(s.sort_order)
             const soon = s.status === 'coming_soon'
-            const isPlan = s.key === 'plan'
+            const isProtected = ['plan_intro', 'products', 'training'].includes(s.key)
             return (
               <a
                 key={s.key}
@@ -45,7 +32,7 @@ export default function Hub({ sections }) {
               >
                 <div className="flex items-start justify-between">
                   <span className="gold-clip font-cinzel font-medium text-[14px] tracking-[0.10em] leading-none">{num}</span>
-                  {isPlan ? (
+                  {isProtected ? (
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -57,9 +44,6 @@ export default function Hub({ sections }) {
                 {soon && (
                   <div className="mt-auto flex items-center justify-between">
                     <SoonPill />
-                    {PLANNED_MONTH[s.key] && (
-                      <span className="text-navy-400 text-[11px] tracking-[0.04em]">{PLANNED_MONTH[s.key]}</span>
-                    )}
                   </div>
                 )}
               </a>

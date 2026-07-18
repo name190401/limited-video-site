@@ -5,7 +5,7 @@ import { handlePasswordAuth } from '@/lib/auth/password-route';
 export const runtime = 'nodejs';
 
 /**
- * Layer2 解除（04/07/09/10 共通の合言葉）。当日の日替わりパスを照合し、
+ * Layer2 解除（04/08/09 共通の合言葉）。当日の日替わりパスを照合し、
  * 成功で qualia_plan httpOnly トークン Cookie を発行（JST 24:00 失効）。
  * レート制限（10回/15分→429）含む共通フローは handlePasswordAuth を参照。
  */

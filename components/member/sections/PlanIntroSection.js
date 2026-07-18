@@ -16,8 +16,15 @@ export default function PlanIntroSection({ videos = [] }) {
       {status === 'locked' && <UnlockGate />}
       {status === 'checking' && <div className="h-24 rounded-xl bg-navy-100/50 animate-pulse" />}
       {status === 'unlocked' && (
-        <div className="grid grid-cols-2 gap-3 animate-fade-in">
-          {mergedVideos.map((video) => <VideoCard key={video.id} video={video} />)}
+        <div className="animate-fade-in">
+          <p className="font-semibold text-gold-600 text-[13px] tracking-[0.08em] mb-3">ロングバージョン</p>
+          <div className="grid grid-cols-2 gap-3">
+            {mergedVideos.filter((video) => video.variant === 'long').map((video) => <VideoCard key={video.id} video={video} />)}
+          </div>
+          <p className="font-semibold text-gold-600 text-[13px] tracking-[0.08em] mt-6 mb-3">ショートバージョン</p>
+          <div className="grid grid-cols-2 gap-3">
+            {mergedVideos.filter((video) => video.variant === 'short').map((video) => <VideoCard key={video.id} video={video} />)}
+          </div>
         </div>
       )}
     </SectionShell>

@@ -11,7 +11,8 @@ export default function VideoCard({ video, muted = false }) {
   return (
     <div>
       <VideoPlayer videoId={video.youtube_id} title={video.title} muted={muted} />
-      <p className="mt-2 text-navy-900 text-[14px] font-medium">{video.title}</p>
+      {/* break-keep=CJK語中で折らない／anywhere=収まらない時のみ折り返し許可／strict=行頭「ー」等の禁則 */}
+      <p className="mt-2 text-navy-900 text-[14px] font-medium break-keep [overflow-wrap:anywhere] [line-break:strict]">{video.title}</p>
     </div>
   )
 }

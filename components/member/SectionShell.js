@@ -6,9 +6,9 @@ import BackToHub from './BackToHub'
  * 紺地サーフェス＋区切り罫 → 中央 680幅 → 章扉（ChapterHeader）→ 本文 → ハブに戻る。
  * 章扉を持たない Hero / Hub / Footer は対象外（個別に組む）。
  *
- * @param {string} num     - '01'〜'13'
+ * @param {string} num     - '01'〜'12'
  * @param {string} title   - 章タイトル
- * @param {string} badge   - 任意の件数バッジ（09/10 等）
+ * @param {string} badge   - 任意の件数バッジ（08/09 等）
  * @param {string} eyebrow - 任意の英ラベル（未指定なら num から既定）
  */
 export default function SectionShell({ num, title, badge, eyebrow, children }) {

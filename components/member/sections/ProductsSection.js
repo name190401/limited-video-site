@@ -10,9 +10,9 @@ import UnlockGate from '../UnlockGate'
 import { usePlanGate } from '../PlanGateProvider'
 
 /**
- * 09 製品（§6）。
- * 章扉に件数バッジ「公開 N / 予定 N」→ 公開済を通常カード（ショート/ロング トグル）＋
- * 準備中を横スクロール予告ストリップ。ショート=ミュート自動ループ / ロング=タップ再生。
+ * 08 製品（§6）。
+ * 章扉に件数バッジ → 公開済を通常カード（パーソナル/プロダクト全14品 トグル・タップ再生）＋
+ * 準備中があれば横スクロール予告ストリップ。
  *
  * @param {Array} videos  section_key='products' の伏せ済み videos
  */
@@ -30,10 +30,10 @@ export default function ProductsSection({ videos = [] }) {
   }, [hasShort, status])
 
   const shown = published.filter((v) => v.variant === tab)
-  const badge = `公開 ${published.length} / 予定 ${soon.length}`
+  const badge = soon.length === 0 ? `全 ${published.length} 本` : `公開 ${published.length} / 予定 ${soon.length}`
 
   return (
-    <SectionShell num="09" title="製品" badge={badge}>
+    <SectionShell num="08" title="製品" badge={badge}>
       {status === 'locked' && <UnlockGate />}
       {status === 'checking' && <div className="h-24 rounded-xl bg-navy-100/50 animate-pulse" />}
       {status === 'unlocked' && (published.length > 0 ? (
@@ -41,8 +41,8 @@ export default function ProductsSection({ videos = [] }) {
           {hasShort && hasLong && (
             <TabBar
               tabs={[
-                { key: 'short', label: 'ショート（音声なし）' },
-                { key: 'long', label: 'ロング' },
+                { key: 'short', label: 'パーソナル' },
+                { key: 'long', label: 'プロダクト全14品' },
               ]}
               active={tab}
               onChange={setTab}

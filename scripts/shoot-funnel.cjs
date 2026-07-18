@@ -6,9 +6,9 @@ const BASE = 'http://localhost:3100'
 
 const EXPECT = {
   ear_opening: ['ySzQg8d3iQ4', 'GYp6q1XNDr4', '19RgaxonW5Q', 'etWgf_7JA6I', '9P9myBeBy2Q', 'j0UfpCtr-n0', 'VTDkDjt4rIk'],
-  plan_intro: ['KUYqhhJ_VMY', '1Pf9pBZKcHs'],
+  plan_intro: ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE'],
   closing: { '中村佳世': 'GPAEvwQ8-Gs', '阿部美道': '3PCylFu0lGg', '久保田幸世': 'cSOg2bSuh54', '竹之内尚也': 'sX0TJ9Ubxl0' },
-  bonus: ['c8DiLN6lVsY'],
+  bonus: ['c8DiLN6lVsY', '1k9wXYFFOVU'],
 }
 
 const idsOnPage = (page) =>
@@ -86,7 +86,7 @@ const scrollToHeading = (page, text) =>
     ['耳開け・導入', 'funnel-03-ear'],
     ['プラン説明', 'funnel-04-plan'],
     ['クロージング', 'funnel-05-closing'],
-    ['ボーナス（インカム）', 'funnel-08-bonus'],
+    ['ボーナス（インカム）', 'funnel-07-bonus'],
   ]
   for (const [heading, tag] of shots) {
     const ok = await scrollToHeading(page, heading)

@@ -4,9 +4,9 @@
  * → 章タイトル（Noto Serif JP）＋ 金clip 章番号（Cinzel）。
  * id="sec-NN" を付与し、IntersectionObserver（SectionMenu）の監視対象・アンカー先を兼ねる。
  *
- * @param {string} num     - '01'〜'13'
+ * @param {string} num     - '01'〜'12'
  * @param {string} title   - 章タイトル
- * @param {string} badge   - 任意の件数バッジ等（09/10 用、例 "公開 2 / 予定 7"）
+ * @param {string} badge   - 任意の件数バッジ等（08/09 用、例 "公開 2 / 全 9"）
  * @param {string} eyebrow - 英ラベル。未指定なら num から既定値を引く。
  * @param {boolean} onGradient - グラデ地（紺）の上に置くか。既定は薄地。
  */
@@ -20,13 +20,12 @@ const EYEBROW = {
   '04': 'THE PLAN',
   '05': 'CLOSING',
   '06': 'SOCIAL',
-  '07': 'MEMBERS PLAN',
-  '08': 'REWARDS',
-  '09': 'PRODUCTS',
-  '10': 'TRAINING',
-  '11': 'HOW TO JOIN',
-  '12': 'GUIDE',
-  '13': 'QUESTIONS',
+  '07': 'REWARDS',
+  '08': 'PRODUCTS',
+  '09': 'TRAINING',
+  '10': 'HOW TO JOIN',
+  '11': 'GUIDE',
+  '12': 'QUESTIONS',
 }
 
 export default function ChapterHeader({ num, title, badge, eyebrow, onGradient = false }) {
