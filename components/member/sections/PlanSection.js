@@ -1,83 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import SectionShell from '../SectionShell'
 import ComingSoonCard from '../ComingSoonCard'
 import TabBar from '../TabBar'
 import VideoCard from '../VideoCard'
-import DividerWithDiamond from '../DividerWithDiamond'
+import UnlockGate from '../UnlockGate'
+import { usePlanGate } from '../PlanGateProvider'
 
 /**
- * 07 プラン — 合言葉ロックの状態機械（§8）。
+ * 07 プラン — 共通 Layer2 ゲートとショート/ロング表示（§8）。
  *
- * バックエンド配線（実機 = lib/auth/layer2.js / Phase4 の API）:
- * - unlocked 判定: GET /api/plan/content（qualia_plan httpOnly Cookie を verifyPlanToken。
- *   200=解除済（保護動画 ID 含む JSON）/ 401=未解除）。localStorage は使わない。
- * - 解除: POST /api/auth/plan { password } → サーバが日替わりパス照合＋レート制限（429）→
- *   成功で qualia_plan Cookie 発行（JST 24:00 失効）。
- * - 保護動画 ID は解除後に /api/plan/content からのみ受け取る（ビルド時埋め込みなし）。
+ * 解除状態と保護動画 ID は PlanGateProvider から受け取り、localStorage は使わない。
  *
  * @param {Array} openVideos  locked でも開放するショート等（protection=layer1・id あり）
  */
 export default function PlanSection({ openVideos = [] }) {
-  const [unlocked, setUnlocked] = useState(false)
-  const [planVideos, setPlanVideos] = useState([])
-  const [pw, setPw] = useState('')
-  const [fails, setFails] = useState(0)
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
+  const { status, videosFor } = usePlanGate()
   const [tab, setTab] = useState('short')
-
-  // 再訪時: まず status で解除状態だけ確認し（常に 200）、解除済のときだけ保護動画を取得。
-  // 未解除で /api/plan/content を叩くと 401 がコンソールに出るため、content は解除済確認後のみ。
-  useEffect(() => {
-    let alive = true
-    fetch('/api/plan/status', { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((s) => {
-        if (!alive || !s?.unlocked) return null
-        setUnlocked(true)
-        return fetch('/api/plan/content', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
-      })
-      .then((d) => {
-        if (alive && d?.videos) setPlanVideos(d.videos)
-      })
-      .catch(() => {})
-    return () => {
-      alive = false
-    }
-  }, [])
-
-  async function handleUnlock(e) {
-    e.preventDefault()
-    if (busy || !pw.trim()) return
-    setBusy(true)
-    setError('')
-    try {
-      const res = await fetch('/api/auth/plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw.trim() }),
-      })
-      if (res.ok) {
-        const content = await fetch('/api/plan/content', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
-        setPlanVideos(content?.videos || [])
-        setUnlocked(true)
-        setPw('')
-      } else if (res.status === 429) {
-        setError('アクセスが集中しています。しばらく時間をおいてからお試しください。')
-      } else {
-        const n = fails + 1
-        setFails(n)
-        setError(n >= 3 ? '紹介者にもう一度確認してみてください。' : '合言葉が違うようです。もう一度どうぞ。')
-      }
-    } catch {
-      setError('通信に失敗しました。もう一度お試しください。')
-    } finally {
-      setBusy(false)
-    }
-  }
-
+  const planVideos = videosFor('plan')
   const shorts = planVideos.filter((v) => v.variant === 'short')
   const longs = planVideos.filter((v) => v.variant === 'long')
   const tabVideos = tab === 'short' ? shorts : longs
@@ -97,50 +38,9 @@ export default function PlanSection({ openVideos = [] }) {
           </p>
         )}
 
-        {!unlocked ? (
-          /* ── locked: 金1px 区切り線 ＋ ハードカットのゲートブロック ── */
-          <div className="mt-6">
-            <DividerWithDiamond />
-            <div
-              className="relative mt-4 rounded-xl px-6 py-12 text-center overflow-hidden"
-              style={{ background: 'radial-gradient(120% 80% at 50% 0%, #1B2A52, #0C1530)' }}
-            >
-              {/* 背後に "もっとある" の輪郭（うっすら） */}
-              <div className="absolute inset-x-6 bottom-0 h-20 opacity-10 pointer-events-none">
-                <div className="h-full rounded-lg bg-navy-100" />
-              </div>
-              {/* 鍵アイコン 28px（金ヘアラインリング） */}
-              <span className="relative inline-flex mb-4 rounded-full p-px gold-hairline">
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-navy-900">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </span>
-              <p className="relative font-serifjp text-white text-[15px] leading-[1.9] mb-6">続きは紹介者から合言葉を聞いて開けます</p>
-
-              <form onSubmit={handleUnlock} className="relative flex flex-col items-center">
-                <input
-                  type="text"
-                  inputMode="text"
-                  autoComplete="off"
-                  value={pw}
-                  onChange={(e) => setPw(e.target.value)}
-                  placeholder="合言葉"
-                  className="w-full max-w-[280px] text-center bg-transparent border border-navy-400 rounded-lg px-4 py-3 text-white placeholder-navy-300 focus:border-gold-400 focus:outline-none"
-                />
-                {error && <p className="mt-3 text-navy-400 text-[12px]">{error}</p>}
-                <button
-                  type="submit"
-                  disabled={busy}
-                  className="btn-gold mt-5 rounded-full font-sansjp font-semibold text-[14px] tracking-[0.06em] px-8 py-3"
-                >
-                  {busy ? '確認中…' : '解除する'}
-                </button>
-              </form>
-            </div>
-          </div>
-        ) : (
+        {status === 'locked' && <UnlockGate />}
+        {status === 'checking' && <div className="mt-6 h-24 rounded-xl bg-navy-100/50 animate-pulse" />}
+        {status === 'unlocked' && (
           /* ── unlocked: ショート/ロング タブ ── */
           <div className="mt-6 animate-[fadeIn_250ms_ease-out]">
             <TabBar
@@ -155,7 +55,7 @@ export default function PlanSection({ openVideos = [] }) {
               {tabVideos.length > 0 ? (
                 tabVideos.map((v) => <VideoCard key={v.id} video={v} />)
               ) : (
-                <ComingSoonCard title={tab === 'short' ? 'ショートプラン動画' : 'ロングプラン動画'} month="6月" />
+                <ComingSoonCard title={tab === 'short' ? 'ショートプラン動画' : 'ロングプラン動画'} month="近日" />
               )}
             </div>
           </div>

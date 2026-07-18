@@ -6,6 +6,7 @@ import Footer from '@/components/member/Footer'
 import OriginSection from '@/components/member/sections/OriginSection'
 import InstructorsSection from '@/components/member/sections/InstructorsSection'
 import VideoGridSection from '@/components/member/sections/VideoGridSection'
+import PlanIntroSection from '@/components/member/sections/PlanIntroSection'
 import ClosingSection from '@/components/member/sections/ClosingSection'
 import InstagramSection from '@/components/member/sections/InstagramSection'
 import PlanSection from '@/components/member/sections/PlanSection'
@@ -16,6 +17,7 @@ import StepsVideoSection from '@/components/member/sections/StepsVideoSection'
 import FaqSection from '@/components/member/sections/FaqSection'
 import { cookies } from 'next/headers'
 import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
+import PlanGateProvider from '@/components/member/PlanGateProvider'
 
 // 動画が DB から来るため毎リクエスト最新を反映（再デプロイ無しで公開反映）。
 export const dynamic = 'force-dynamic'
@@ -39,7 +41,7 @@ export default async function MemberHome() {
   const planOpen = v('plan').filter((x) => !x.locked && x.youtube_id) // layer1 のショート等のみ開放
 
   return (
-    <>
+    <PlanGateProvider>
       <span id="top" />
       <SectionMenu sections={sections} isAdmin={isAdmin} />
       <Hero lead={lead} />
@@ -48,7 +50,7 @@ export default async function MemberHome() {
       <OriginSection section={byKey.origin} />
       <InstructorsSection instructors={lecturers} />
       <VideoGridSection num="03" title="耳開け・導入" lead="まずはここから。各メンバーの導入動画をご覧ください。" videos={v('ear_opening')} month="6月" />
-      <VideoGridSection num="04" title="プラン説明" lead="新規事業説明会の動画です。" videos={v('plan_intro')} desired={2} month="6月" />
+      <PlanIntroSection videos={v('plan_intro')} />
       <ClosingSection closers={closers} videos={v('closing')} />
       <InstagramSection igUrl={null} />
       <PlanSection openVideos={planOpen} />
@@ -72,13 +74,13 @@ export default async function MemberHome() {
         steps={[
           { label: 'メニューから見たい項目へ', desc: '右上のメニュー、またはハブから各セクションに飛べます。' },
           { label: '動画はタップで再生', desc: '気になる動画をタップするとその場で再生します。' },
-          { label: 'プランは合言葉で解除', desc: 'プランの続きは紹介者から合言葉を聞いて開きます。' },
+          { label: '保護動画は合言葉で解除', desc: 'プラン説明・プラン・製品・トレーニングは紹介者から合言葉を聞いて開きます。' },
         ]}
         video={null}
       />
       <FaqSection faqs={faqs} />
 
       <Footer />
-    </>
+    </PlanGateProvider>
   )
 }

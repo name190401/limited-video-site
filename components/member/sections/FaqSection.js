@@ -13,16 +13,10 @@ import PillButton from '../PillButton'
 export default function FaqSection({ faqs = [] }) {
   const [open, setOpen] = useState(null)
 
-  const fallback = [
-    { id: 'f1', question: 'QUALIA はどんなグループですか？', answer: '製品の体験とコミュニティを大切にする教育型のグループです。詳しくは紹介者にお尋ねください。' },
-    { id: 'f2', question: '費用はかかりますか？', answer: '関わり方によって異なります。無理のない範囲で始められます。' },
-  ]
-  const items = faqs.length ? faqs : fallback
-
   return (
     <SectionShell num="13" title="よくある質問">
       <ul className="max-w-[640px] mx-auto divide-y divide-navy-200 border-y border-navy-200">
-        {items.map((f) => {
+        {faqs.map((f) => {
           const isOpen = open === f.id
           return (
             <li key={f.id} className={`transition-colors ${isOpen ? 'bg-gold-50/40' : ''}`}>
@@ -39,7 +33,7 @@ export default function FaqSection({ faqs = [] }) {
               </button>
               <div className={`acc-panel ${isOpen ? 'is-open' : ''}`}>
                 <div>
-                  <p className="pb-4 px-3 text-navy-900/80 text-[14px] leading-[1.8]">{f.answer}</p>
+                  <p className="pb-4 px-3 text-navy-900/80 text-[14px] leading-[1.8] whitespace-pre-line">{f.answer}</p>
                 </div>
               </div>
             </li>
