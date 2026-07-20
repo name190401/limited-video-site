@@ -39,7 +39,7 @@ export default function ClosingSection({ closers = [], videos = [] }) {
   }))
 
   return (
-    <SectionShell num="05" title="クロージング">
+    <SectionShell num="05" title="エンディング">
       {tabs.length ? (
         <>
           <TabBar tabs={tabItems} active={active} onChange={setActive} scrollable />
@@ -50,11 +50,11 @@ export default function ClosingSection({ closers = [], videos = [] }) {
               ))}
             </div>
           ) : (
-            <ComingSoonCard title={`${activeCloser?.name ?? '担当'}のクロージング動画`} month="6月" />
+            <ComingSoonCard title={`${activeCloser?.name ?? '担当'}のエンディング動画`} month="6月" />
           )}
         </>
       ) : (
-        <ComingSoonCard title="クロージング動画" month="6月" />
+        <ComingSoonCard title="エンディング動画" month="6月" />
       )}
     </SectionShell>
   )

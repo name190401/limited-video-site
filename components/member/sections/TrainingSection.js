@@ -39,7 +39,7 @@ export default function TrainingSection({ videos = [] }) {
                 )}
               </div>
               <p className="mt-1.5 font-semibold text-navy-900 text-[14px] leading-snug break-keep [overflow-wrap:anywhere] [line-break:strict]">{v.title}</p>
-              {v.subtitle && <p className="mt-1 text-navy-400 text-[12px]">担当：{v.subtitle}</p>}
+              {v.subtitle && <p className="mt-1 text-navy-400 text-[12px] break-keep [overflow-wrap:anywhere] [line-break:strict]">担当：{v.subtitle}</p>}
               {ready && (
                 <div className="mt-2">
                   <VideoPlayer videoId={v.youtube_id} title={v.title} />

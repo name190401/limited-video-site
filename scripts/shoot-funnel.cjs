@@ -68,7 +68,7 @@ const scrollToHeading = (page, text) =>
     try {
       // クロージング章内のタブ（textContent===名前の button）をクリック
       const clicked = await page.evaluate((nm) => {
-        const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('クロージング'))
+        const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('エンディング'))
         const sec = h ? (h.closest('section') || h.parentElement) : document
         const btn = [...sec.querySelectorAll('button')].find((b) => b.textContent.trim() === nm || b.textContent.trim().startsWith(nm))
         if (btn) { btn.click(); return true }
@@ -83,9 +83,9 @@ const scrollToHeading = (page, text) =>
 
   // スクショ（各セクション先頭へスクロール）
   const shots = [
-    ['耳開け・導入', 'funnel-03-ear'],
+    ['オープニング', 'funnel-03-ear'],
     ['プラン説明', 'funnel-04-plan'],
-    ['クロージング', 'funnel-05-closing'],
+    ['エンディング', 'funnel-05-closing'],
     ['ボーナス（インカム）', 'funnel-07-bonus'],
   ]
   for (const [heading, tag] of shots) {

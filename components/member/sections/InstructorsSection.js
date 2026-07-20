@@ -41,6 +41,7 @@ export default function InstructorsSection({ instructors = [] }) {
                 CASTLE INSTRUCTOR
               </span>
               <h3 className="mt-0.5 font-serifjp text-[23px] leading-tight text-white">{lead.name}</h3>
+              {lead.furigana && <p className="mt-0.5 text-[11px] tracking-[0.18em] text-white/70">{lead.furigana}</p>}
               <span className="text-gold-300 text-[12px] tracking-[0.1em]">
                 castle 講師
                 {lead.region ? `・${lead.region}` : ''}
@@ -97,6 +98,7 @@ export default function InstructorsSection({ instructors = [] }) {
                     <h3 className="font-serifjp text-[21px] leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                       {i.name}
                     </h3>
+                    {i.furigana && <p className="mt-0.5 text-[11px] tracking-[0.18em] text-white/70">{i.furigana}</p>}
                   </div>
                 </div>
                 {/* 物語（常時表示・改行保持） */}

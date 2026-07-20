@@ -24,14 +24,14 @@ const BASE = 'http://localhost:3100'
 
   // §03 先頭の動画ポスターをクリック
   await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('耳開け・導入'))
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('オープニング'))
     const sec = h.closest('section') || h.parentElement
     const top = window.scrollY + sec.getBoundingClientRect().top - 8
     window.scrollTo({ top, behavior: 'instant' })
   })
   await page.waitForTimeout(600)
   const clicked = await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('耳開け・導入'))
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('オープニング'))
     const sec = h.closest('section') || h.parentElement
     const btn = [...sec.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('全画面で再生'))
     if (btn) { btn.click(); return btn.getAttribute('aria-label') }

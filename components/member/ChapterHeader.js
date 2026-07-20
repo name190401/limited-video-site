@@ -16,9 +16,9 @@ import DividerWithDiamond from './DividerWithDiamond'
 const EYEBROW = {
   '01': 'ORIGIN',
   '02': 'INSTRUCTORS',
-  '03': 'INTRODUCTION',
+  '03': 'OPENING',
   '04': 'THE PLAN',
-  '05': 'CLOSING',
+  '05': 'ENDING',
   '06': 'SOCIAL',
   '07': 'REWARDS',
   '08': 'PRODUCTS',

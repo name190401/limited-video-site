@@ -17,13 +17,13 @@ const BASE = 'http://localhost:3100'
 
   // §03 先頭動画をクリック
   await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('耳開け・導入'))
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('オープニング'))
     const sec = h.closest('section') || h.parentElement
     window.scrollTo({ top: window.scrollY + sec.getBoundingClientRect().top - 8, behavior: 'instant' })
   })
   await page.waitForTimeout(500)
   await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('耳開け・導入'))
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('オープニング'))
     const sec = h.closest('section') || h.parentElement
     const btn = [...sec.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('全画面で再生'))
     btn && btn.click()
