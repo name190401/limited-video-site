@@ -30,7 +30,7 @@ export default function StepsVideoSection({ num, title, steps = [], video = null
             </a>
           </div>
         ) : (
-          <ComingSoonCard title={`${title}の動画`} month="6月" />
+          <ComingSoonCard title={`${title}の動画`} />
         )}
 
         {steps.length > 0 && <StepChain steps={steps} size="sm" className="mt-6" />}

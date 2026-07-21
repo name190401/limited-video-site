@@ -62,7 +62,6 @@ export default async function MemberHome() {
           { label: '必要事項を入力', desc: 'お名前・連絡先などを登録します。' },
           { label: '登録完了', desc: 'そのまま QUALIA をスタートできます。' },
         ]}
-        pdf={{ href: 'https://d27rnpuamwvieu.cloudfront.net/pdf/0uT7h7l1iM9qe5zXAM12OSwXX.pdf', label: '登録の流れ（PDF）を開く' }}
         cta="登録について紹介者に聞く"
       />
       <StepsVideoSection

@@ -170,13 +170,15 @@ const shot = async (page, report, tag) => {
   await page.waitForTimeout(600)
   await shot(page, report, '09-training')
 
-  // 6) §10 PDF、§11 Layer1動画
+  // 6) §10（PDFは2026-07-21のクライアント要望で一時削除→準備中カード）、§11 Layer1動画
   await scrollToHeading(page, '登録の流れ'); await page.waitForTimeout(500)
   const pdf = await page.evaluate(() => {
     const a = document.querySelector('a[href*="d27rnpuamwvieu.cloudfront.net"]')
-    return { found: !!a, target: a?.getAttribute('target'), href: a?.href }
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('登録の流れ'))
+    const sec = h ? (h.closest('section') || h.parentElement) : null
+    return { found: !!a, comingSoon: !!sec && sec.textContent.includes('準備中') }
   })
-  check('§10登録の流れにCloudFront PDF別タブリンク', pdf.found && pdf.target === '_blank', JSON.stringify(pdf))
+  check('§10登録の流れ: PDFリンク無し＋準備中カード表示', !pdf.found && pdf.comingSoon, JSON.stringify(pdf))
   await shot(page, report, '10-pdf')
 
   await scrollToHeading(page, 'QUALIA ページの使い方'); await page.waitForTimeout(500)
