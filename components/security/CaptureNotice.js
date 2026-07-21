@@ -2,9 +2,14 @@
 export default function CaptureNotice() {
   return (
     <div className="fixed bottom-2 inset-x-0 z-30 pointer-events-none flex justify-center px-4">
-      <p className="rounded-full bg-navy-900/75 px-3 py-1.5 text-center text-[10px] leading-none text-white/60 backdrop-blur-sm">
-        スクリーンショット・画面録画・無断転載は固く禁止されています
-      </p>
+      <div className="max-w-full rounded-2xl bg-navy-900/75 px-3 py-1.5 text-center backdrop-blur-sm">
+        <p className="break-keep text-[10px] leading-tight text-white/60">
+          スクリーンショット・画面録画・無断転載は固く禁止されています
+        </p>
+        <p className="mt-1 break-keep text-[10px] leading-tight text-white/65">
+          アクセスログ（IPアドレス等）を記録しています
+        </p>
+      </div>
     </div>
   )
 }

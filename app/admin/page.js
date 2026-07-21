@@ -4,6 +4,7 @@ import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
 import { getPasswordsForDays } from '@/lib/password'
 import { getSitePassword } from '@/lib/settings'
 import AdminDashboard from '@/components/admin/AdminDashboard'
+import { getLoginEvents, getPlayStats, logsEnabled } from '@/lib/logs'
 
 // 日付・日替わりコードは毎リクエスト最新（キャッシュしない）。
 export const dynamic = 'force-dynamic'
@@ -32,6 +33,15 @@ export default async function AdminPage() {
     code: d.groups[0].password,
   }))
   const sitePassword = await getSitePassword()
+  const [loginEvents, playStats] = await Promise.all([getLoginEvents(50), getPlayStats()])
 
-  return <AdminDashboard days={days} sitePassword={sitePassword} />
+  return (
+    <AdminDashboard
+      days={days}
+      sitePassword={sitePassword}
+      loginEvents={loginEvents}
+      playStats={playStats}
+      logsEnabled={logsEnabled()}
+    />
+  )
 }

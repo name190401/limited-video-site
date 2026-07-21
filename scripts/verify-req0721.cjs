@@ -8,7 +8,7 @@ const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
-const BASE = 'http://localhost:3100'
+const BASE = process.env.BASE || 'http://localhost:3100'
 
 function todayCode() {
   if (process.env.QCODE) return process.env.QCODE

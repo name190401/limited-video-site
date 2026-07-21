@@ -31,3 +31,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# Supabase CLI の内部状態（link 副産物）
+supabase/.temp/

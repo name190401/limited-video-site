@@ -4,6 +4,33 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const WD = ['日', '月', '火', '水', '木', '金', '土']
+const JST_DATE_TIME = new Intl.DateTimeFormat('ja-JP', {
+  timeZone: 'Asia/Tokyo',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+function fmtJst(value) {
+  if (!value) return '—'
+  return JST_DATE_TIME.format(new Date(value))
+}
+
+function deviceLabel(ua) {
+  if (!ua) return '不明'
+  if (/iPhone/i.test(ua)) return 'iPhone'
+  if (/iPad/i.test(ua)) return 'iPad'
+  if (/Android/i.test(ua)) return 'Android'
+  return 'PC'
+}
+
+const LOGIN_LABELS = {
+  member: '会員ログイン',
+  admin: '管理者ログイン',
+  unlock: 'コード解除',
+}
 
 /** 'YYYY-MM-DD' → { md:'6/25', wd:'木' }（曜日はTZ非依存に算出）。 */
 function fmt(ds) {
@@ -41,7 +68,7 @@ function CopyButton({ value, className = '' }) {
  * @param {{date:string,code:string}[]} days  先頭が今日（JST）
  * @param {string} sitePassword
  */
-export default function AdminDashboard({ days, sitePassword }) {
+export default function AdminDashboard({ days, sitePassword, loginEvents, playStats, logsEnabled }) {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const today = days[0]
@@ -168,6 +195,71 @@ export default function AdminDashboard({ days, sitePassword }) {
           <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
             メンバーがサイトに入るための共通パスワードです（入口の「合言葉」）。日替わりではありません。
           </p>
+        </section>
+
+        {/* 動画再生回数 */}
+        <section className="mt-10">
+          <p className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
+            Video Plays
+          </p>
+          <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">動画再生回数</h2>
+          <div className="mt-3 overflow-hidden rounded-2xl border border-gold-500/25 bg-navy-800/40">
+            {!logsEnabled ? (
+              <p className="px-4 py-5 text-[12px] leading-relaxed text-navy-300">
+                ログ記録は未設定です（Supabase 接続後に有効化されます）
+              </p>
+            ) : playStats.length === 0 ? (
+              <p className="px-4 py-5 text-[12px] text-navy-300">まだ記録がありません</p>
+            ) : (
+              <ul>
+                {playStats.map((stat, i) => (
+                  <li
+                    key={stat.youtubeId}
+                    className={`grid grid-cols-[minmax(0,1fr)_3rem] gap-x-3 px-4 py-3 ${i > 0 ? 'border-t border-gold-500/15' : ''}`}
+                  >
+                    <p className="truncate text-[12px] text-navy-100" title={stat.title || stat.youtubeId}>
+                      {stat.title || stat.youtubeId}
+                    </p>
+                    <p className="text-right font-cinzel text-[14px] text-gold-200">{stat.count}回</p>
+                    <p className="col-span-2 mt-1 truncate text-[10px] text-navy-400">
+                      最終再生 {fmtJst(stat.lastPlayedAt)} JST
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+
+        {/* ログイン履歴 */}
+        <section className="mt-10">
+          <p className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
+            Login History
+          </p>
+          <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">ログイン履歴</h2>
+          <div className="mt-3 overflow-hidden rounded-2xl border border-gold-500/25 bg-navy-800/40">
+            {!logsEnabled ? (
+              <p className="px-4 py-5 text-[12px] leading-relaxed text-navy-300">
+                ログ記録は未設定です（Supabase 接続後に有効化されます）
+              </p>
+            ) : loginEvents.length === 0 ? (
+              <p className="px-4 py-5 text-[12px] text-navy-300">まだ記録がありません</p>
+            ) : (
+              <ul>
+                {loginEvents.map((event, i) => (
+                  <li
+                    key={event.id}
+                    className={`grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 px-4 py-3 ${i > 0 ? 'border-t border-gold-500/15' : ''}`}
+                  >
+                    <p className="text-[11px] tabular-nums text-navy-300">{fmtJst(event.ts)}</p>
+                    <p className="truncate text-[12px] text-gold-200">{LOGIN_LABELS[event.kind] || event.kind}</p>
+                    <p className="truncate text-[10px] text-navy-400" title={event.ip || ''}>{event.ip || '—'}</p>
+                    <p className="truncate text-[10px] text-navy-400" title={event.ua || ''}>{deviceLabel(event.ua)}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
         <p className="mt-10 text-center text-navy-400 text-[10px] font-sansjp tracking-[0.1em]">

@@ -27,6 +27,7 @@ export default function SitePlayer({ videoId, title }) {
   const tickRef = useRef(null)
   const revealTimerRef = useRef(null)
   const firstPlayRef = useRef(false)
+  const playLoggedRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [revealed, setRevealed] = useState(false) // 映像を見せてよい状態（定常再生中のみ）
   const [muted, setMuted] = useState(false)
@@ -64,6 +65,15 @@ export default function SitePlayer({ videoId, title }) {
               if (firstPlayRef.current) {
                 setRevealed(true) // 一時停止からの再開: タイトルは再表示されないので即reveal
               } else {
+                if (!playLoggedRef.current) {
+                  playLoggedRef.current = true
+                  fetch('/api/log/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoId, title }),
+                    keepalive: true,
+                  }).catch(() => {})
+                }
                 if (revealTimerRef.current) clearTimeout(revealTimerRef.current)
                 revealTimerRef.current = setTimeout(() => {
                   firstPlayRef.current = true

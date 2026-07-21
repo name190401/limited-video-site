@@ -4,6 +4,7 @@ import { issueLayer1CookieValue, layer1CookieOptions, LAYER1_COOKIE } from '@/li
 import { issueAdminCookieValue, adminCookieOptions, ADMIN_COOKIE } from '@/lib/auth/admin';
 import { checkAndIncrement, clientIp } from '@/lib/ratelimit';
 import { getJstDateString } from '@/lib/date';
+import { logLogin } from '@/lib/logs';
 
 export const runtime = 'nodejs';
 
@@ -42,6 +43,11 @@ export async function POST(request) {
     }
 
     await gate.registerSuccess();
+    await logLogin({
+      kind: isAdmin ? 'admin' : 'member',
+      ip,
+      ua: request.headers.get('user-agent') || null,
+    });
     const res = NextResponse.json({ success: true, role: isAdmin ? 'admin' : 'member' });
     res.cookies.set(LAYER1_COOKIE, await issueLayer1CookieValue(), layer1CookieOptions());
     if (isAdmin) {
