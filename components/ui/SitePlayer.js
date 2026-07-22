@@ -28,9 +28,12 @@ export default function SitePlayer({ videoId, title }) {
   const revealTimerRef = useRef(null)
   const firstPlayRef = useRef(false)
   const playLoggedRef = useRef(false)
+  const startedRef = useRef(false)
+  const fallbackTimerRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [revealed, setRevealed] = useState(false) // 映像を見せてよい状態（定常再生中のみ）
   const [muted, setMuted] = useState(false)
+  const [autoMuted, setAutoMuted] = useState(false)
   const [ended, setEnded] = useState(false)
   const [cur, setCur] = useState(0)
   const [dur, setDur] = useState(0)
@@ -45,12 +48,30 @@ export default function SitePlayer({ videoId, title }) {
         playerVars: {
           autoplay: 1, controls: 0, modestbranding: 1, rel: 0,
           iv_load_policy: 3, playsinline: 1, fs: 0, disablekb: 1, color: 'white',
+          origin: window.location.origin, enablejsapi: 1,
         },
         events: {
           onReady: (e) => {
             if (cancelled) return
             setDur(e.target.getDuration() || 0)
+            try {
+              const ifr = e.target.getIframe && e.target.getIframe()
+              if (ifr) ifr.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture')
+            } catch (_) {}
             try { e.target.playVideo() } catch (_) {}
+            const FALLBACK_MS = 1500
+            fallbackTimerRef.current = setTimeout(() => {
+              if (cancelled) return
+              if (startedRef.current) return
+              const p = playerRef.current
+              if (!p) return
+              try {
+                p.mute()
+                p.playVideo()
+                setMuted(true)
+                setAutoMuted(true)
+              } catch (_) {}
+            }, FALLBACK_MS)
             tickRef.current = setInterval(() => {
               const p = playerRef.current
               if (!p || !p.getCurrentTime) return
@@ -61,6 +82,8 @@ export default function SitePlayer({ videoId, title }) {
           onStateChange: (e) => {
             const s = e.data // 1=playing 2=paused 0=ended 3=buffering
             if (s === 1) {
+              startedRef.current = true
+              if (fallbackTimerRef.current) { clearTimeout(fallbackTimerRef.current); fallbackTimerRef.current = null }
               setPlaying(true); setEnded(false)
               if (firstPlayRef.current) {
                 setRevealed(true) // 一時停止からの再開: タイトルは再表示されないので即reveal
@@ -96,6 +119,7 @@ export default function SitePlayer({ videoId, title }) {
       cancelled = true
       if (tickRef.current) clearInterval(tickRef.current)
       if (revealTimerRef.current) clearTimeout(revealTimerRef.current)
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current)
       try { playerRef.current && playerRef.current.destroy() } catch (_) {}
       playerRef.current = null
     }
@@ -117,8 +141,16 @@ export default function SitePlayer({ videoId, title }) {
     e.stopPropagation()
     const p = playerRef.current
     if (!p) return
-    if (p.isMuted && p.isMuted()) { p.unMute(); setMuted(false) }
+    if (p.isMuted && p.isMuted()) { p.unMute(); setMuted(false); setAutoMuted(false) }
     else { p.mute(); setMuted(true) }
+  }
+  const enableSound = (e) => {
+    e.stopPropagation()
+    const p = playerRef.current
+    if (!p) return
+    try { p.unMute(); p.setVolume && p.setVolume(100) } catch (_) {}
+    setMuted(false)
+    setAutoMuted(false)
   }
   const seek = (e) => {
     e.stopPropagation()
@@ -165,6 +197,16 @@ export default function SitePlayer({ videoId, title }) {
           </span>
         )}
       </button>
+
+      {autoMuted && playing && (
+        <button
+          type="button"
+          onClick={enableSound}
+          className="absolute left-1/2 bottom-16 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-gold-400 bg-navy-900/80 px-4 py-2 text-[13px] text-gold-200 backdrop-blur-sm"
+        >
+          🔊 タップして音声をON
+        </button>
+      )}
 
       {/* 終了オーバーレイ（YouTube の関連動画グリッドを隠してサイト内で完結） */}
       {ended && (
