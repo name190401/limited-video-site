@@ -13,6 +13,7 @@ import BonusSection from '@/components/member/sections/BonusSection'
 import ProductsSection from '@/components/member/sections/ProductsSection'
 import TrainingSection from '@/components/member/sections/TrainingSection'
 import StepsVideoSection from '@/components/member/sections/StepsVideoSection'
+import ComplianceSection from '@/components/member/sections/ComplianceSection'
 import FaqSection from '@/components/member/sections/FaqSection'
 import { cookies } from 'next/headers'
 import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
@@ -74,6 +75,14 @@ export default async function MemberHome() {
         ]}
         video={publishedVideos(v('how_to_use'))[0] || null}
       />
+      <VideoGridSection
+        num="12"
+        title="北村弁護士の副業のすすめ"
+        lead="副業と法律の考え方について、弁護士の北村晴男先生が解説しています。"
+        videos={v('kitamura')}
+        desired={1}
+      />
+      <ComplianceSection />
       <FaqSection faqs={faqs} />
 
       <Footer />

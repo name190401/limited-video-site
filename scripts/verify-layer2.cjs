@@ -6,10 +6,10 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
-const BASE = 'http://localhost:3100'
+const BASE = process.env.BASE || 'http://localhost:3100'
 
 const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
-const PRODUCT_IDS = ['tuSEuVC6SQU', 'PKTwEWA5n3A']
+const PRODUCT_IDS = ['tuSEuVC6SQU', 'PKTwEWA5n3A', 'XOo-ifRXVBw']
 const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'B_Cd-YQ1h30']
 const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS, ...TRAINING_IDS]
 const BONUS_IDS = ['c8DiLN6lVsY', '1k9wXYFFOVU']
@@ -88,7 +88,7 @@ const shot = async (page, report, tag) => {
   // 1) 初期ペイロードに保護IDが無い
   const html = await page.content()
   const leaked = PROTECTED_IDS.filter((id) => html.includes(id))
-  check('初期ペイロードに保護15IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
+  check('初期ペイロードに保護16IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
 
   // 2) 未解除でゲート3つ（§04/§08/§09）
   const gates = await gateCount(page)
@@ -134,26 +134,40 @@ const shot = async (page, report, tag) => {
   await scrollToHeading(page, 'プラン説明'); await page.waitForTimeout(700)
   await shot(page, report, '04-unlocked')
 
-  // 4) §08 製品: パーソナル→プロダクト全14品の両タブ
-  const productPersonal = await page.evaluate(() => {
+  // 4) §08 製品: 3タブの存在＋各タブで対応する動画1本だけを描画
+  const productTabs = await page.evaluate(() => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('製品'))
     if (!h) return { ok: false }
     const sec = h.closest('section') || h.parentElement
     window.scrollTo({ top: window.scrollY + sec.getBoundingClientRect().top - 8, behavior: 'instant' })
     const tabs = [...sec.querySelectorAll('button')].map((b) => b.textContent.trim())
-    const ids = [...sec.querySelectorAll('img')].map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1]).filter(Boolean)
-    return { ok: true, tabs, ids }
+    return { ok: true, tabs }
   })
-  const clickedProduct = await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('製品'))
-    const sec = h && (h.closest('section') || h.parentElement)
-    const btn = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.trim() === 'プロダクト全14品')
-    if (!btn) return false
-    btn.click(); return true
-  })
-  await page.waitForTimeout(600)
-  const productLong = await sectionInfo(page, '製品')
-  check('§08製品の2タブと各動画サムネイル', productPersonal.tabs?.includes('パーソナル') && productPersonal.ids?.includes(PRODUCT_IDS[0]) && clickedProduct && productLong.ids.includes(PRODUCT_IDS[1]), JSON.stringify({ personal: productPersonal, longIds: productLong.ids }))
+  const expectedProductTabs = ['パーソナル', 'プロダクト全14品', 'BELLEQUAGE']
+  const productViews = []
+  for (let i = 0; i < expectedProductTabs.length; i++) {
+    const label = expectedProductTabs[i]
+    const clicked = await page.evaluate((tabLabel) => {
+      const sec = document.querySelector('#sec-08')?.closest('section')
+      const btn = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.trim() === tabLabel)
+      if (!btn) return false
+      btn.click()
+      return true
+    }, label)
+    await page.waitForTimeout(600)
+    const ids = await page.evaluate(() => {
+      const sec = document.querySelector('#sec-08')?.closest('section')
+      return [...(sec?.querySelectorAll('img') || [])]
+        .map((img) => (img.src.match(/\/vi\/([\w-]{11})\//) || [])[1])
+        .filter(Boolean)
+    })
+    productViews.push({ label, clicked, ids })
+  }
+  const productTabsExact = expectedProductTabs.every((label) => productTabs.tabs?.includes(label))
+    && productTabs.tabs?.filter((label) => expectedProductTabs.includes(label)).length === 3
+  const productViewsExact = productViews.every((view, i) =>
+    view.clicked && view.ids.length === 1 && view.ids[0] === PRODUCT_IDS[i])
+  check('§08製品の3タブと各タブ対応動画1本', productTabsExact && productViewsExact, JSON.stringify({ tabs: productTabs.tabs, views: productViews }))
   await shot(page, report, '08-products')
 
   // 5) §09 トレーニング: 準備中なし、公開9本

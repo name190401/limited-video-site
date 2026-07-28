@@ -14,6 +14,8 @@ const PATHS = {
   training: 'M4 6h16M4 12h16M4 18h10', // トレーニング=リスト
   registration: 'M5 12l4 4 10-10', // 登録=チェック
   how_to_use: 'M12 17h.01M9 9a3 3 0 114 2.5c-1 .7-1 1-1 2', // 使い方=?
+  kitamura: 'M12 4v16M7 7h10M5 7l-3 6h6L5 7zM19 7l-3 6h6l-3-6zM8 20h8', // 北村弁護士=天秤
+  compliance: 'M12 3l7 3v5c0 4.5-2.8 8-7 10-4.2-2-7-5.5-7-10V6l7-3zM8.5 12l2 2 5-5', // 法令遵守=盾＋チェック
   faq: 'M8 10h8M8 14h5M4 5h16v12H9l-5 4V5z', // FAQ=吹き出し
 }
 

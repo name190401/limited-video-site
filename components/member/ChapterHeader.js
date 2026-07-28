@@ -25,7 +25,9 @@ const EYEBROW = {
   '09': 'TRAINING',
   '10': 'HOW TO JOIN',
   '11': 'GUIDE',
-  '12': 'QUESTIONS',
+  '12': 'SIDE BUSINESS',
+  '13': 'COMPLIANCE',
+  '14': 'QUESTIONS',
 }
 
 export default function ChapterHeader({ num, title, badge, eyebrow, onGradient = false }) {

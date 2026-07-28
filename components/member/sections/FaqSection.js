@@ -14,7 +14,7 @@ export default function FaqSection({ faqs = [] }) {
   const [open, setOpen] = useState(null)
 
   return (
-    <SectionShell num="12" title="よくある質問">
+    <SectionShell num="14" title="よくある質問">
       <ul className="max-w-[640px] mx-auto divide-y divide-navy-200 border-y border-navy-200">
         {faqs.map((f) => {
           const isOpen = open === f.id
