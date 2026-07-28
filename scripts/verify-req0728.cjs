@@ -82,6 +82,14 @@ function todayCode() {
   check('5. FAQは§14', sections.s14.title === 'よくある質問', sections.s14.title)
   check('6. §12に旧FAQタイトルなし', sections.s12.title !== 'よくある質問', sections.s12.title)
 
+  // ⑤ §03オープニング先頭の表記（中村佳世 → 中村佳世・中村正人）
+  const opening = await page.evaluate(() => {
+    const sec = document.querySelector('#sec-03')?.closest('section')
+    const titles = [...(sec?.querySelectorAll('p') || [])].map((p) => p.textContent.trim())
+    return { titles, hasNew: titles.includes('中村佳世・中村正人'), hasOldAlone: titles.includes('中村佳世') }
+  })
+  check('6b. §03オープニングは「中村佳世・中村正人」表記', opening.hasNew && !opening.hasOldAlone, JSON.stringify(opening.titles))
+
   const hub = await page.evaluate(() => {
     const tiles = [...document.querySelectorAll('#hub a[href^="#sec-"]')]
     return { count: tiles.length, text: tiles.map((a) => a.textContent.trim()) }
