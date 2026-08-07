@@ -4,26 +4,21 @@ import SectionShell from '../SectionShell'
 import VideoPlayer from '../../ui/VideoPlayer'
 import { isPublished, publishedVideos } from '@/lib/video'
 import { pad2 } from '@/lib/format'
-import UnlockGate from '../UnlockGate'
-import { usePlanGate } from '../PlanGateProvider'
 
 /**
  * 09 トレーニング（§6）。章扉（件数バッジ）→ 9項目を2列タイルグリッド。
  * 各タイル: 番号＋タイトル＋担当（subtitle）＋状態ピル。公開済はタイル内に動画、準備中はピル＋opacity0.7。
+ * §09 は Layer1（2026-08-05 クライアント要望で Layer2 保護を解除）。
  *
  * @param {Array} videos  section_key='training' の videos（sort_order 順）
  */
 export default function TrainingSection({ videos = [] }) {
-  const { status, merge } = usePlanGate()
-  const mergedVideos = merge(videos)
-  const badge = `公開 ${publishedVideos(mergedVideos).length} / 全 ${mergedVideos.length}`
+  const badge = `公開 ${publishedVideos(videos).length} / 全 ${videos.length}`
 
   return (
     <SectionShell num="09" title="トレーニング" badge={badge}>
-      {status === 'locked' && <UnlockGate />}
-      {status === 'checking' && <div className="h-24 rounded-xl bg-navy-100/50 animate-pulse" />}
-      {status === 'unlocked' && <div className="grid grid-cols-2 gap-3">
-        {mergedVideos.map((v, i) => {
+      <div className="grid grid-cols-2 gap-3">
+        {videos.map((v, i) => {
           const ready = isPublished(v)
           return (
             <div
@@ -48,7 +43,7 @@ export default function TrainingSection({ videos = [] }) {
             </div>
           )
         })}
-      </div>}
+      </div>
     </SectionShell>
   )
 }

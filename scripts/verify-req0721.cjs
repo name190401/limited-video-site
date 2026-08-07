@@ -1,7 +1,7 @@
 // 追加要望7/21の実測検証（headless Chrome・375px）
 // 1) §03/§05 の新名称（章扉・Hub・メニュー・eyebrow）＋旧名称の残存0
 // 2) §02 講師14名のふりがな表示＋はみ出しなし
-// 3) §09 トレーニング担当者名（Layer2解除後）＋語中改行なし
+// 3) §09 トレーニング担当者名（Layer2解除不要・2026-08-05にLayer1化）＋語中改行なし
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0721.cjs
 const { chromium } = require('playwright')
 const crypto = require('crypto')
@@ -131,7 +131,38 @@ const TRAINING = [
   await page.waitForTimeout(900)
   await page.screenshot({ path: `${OUT}/qualia-req0721-sec02-furigana.jpeg`, type: 'jpeg', quality: 82 })
 
-  // ── 3) Layer2 解除（§04ゲートのUIから・verify-layer2と同方式）→ §09 担当者名 ──
+  // ── 3) §09 担当者名（Layer1化済みのため解除不要）──
+  const t09 = await page.evaluate(() => {
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('トレーニング'))
+    const sec = h ? (h.closest('section') || h.parentElement) : null
+    if (!sec) return { found: false }
+    return {
+      found: true,
+      gates: sec.querySelectorAll('input[placeholder="合言葉"]').length,
+      thumbs: [...sec.querySelectorAll('img')].map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1]).filter(Boolean).length,
+    }
+  })
+  ok('§09は未解除で9項目表示（合言葉入力0）', !!(t09.found && t09.gates === 0 && t09.thumbs === 9), JSON.stringify(t09))
+
+  for (const [title, staff] of TRAINING) {
+    const r = await page.evaluate(([tt, st]) => {
+      const tEl = [...document.querySelectorAll('p')].find((e) => e.textContent.trim() === tt)
+      if (!tEl) return { found: false }
+      const sib = tEl.nextElementSibling
+      const want = `担当：${st}`
+      if (!sib || sib.textContent.trim() !== want)
+        return { found: true, staff: false, actual: sib ? sib.textContent.trim() : '(なし)' }
+      // 語中改行チェック: 行数と、行末が名前の途中（かな括弧の内側で開き括弧直後以外）で割れていないか
+      const rect = sib.getBoundingClientRect()
+      const overflowX = rect.right > window.innerWidth + 1
+      const clipped = sib.scrollWidth > sib.clientWidth + 1
+      return { found: true, staff: true, overflowX, clipped }
+    }, [title, staff])
+    ok(`§09 ${title} → 担当：${staff}`, !!(r.found && r.staff && !r.overflowX && !r.clipped),
+      r.found ? (r.staff ? '' : `不一致: ${r.actual}`) : 'タイトルなし')
+  }
+
+  // ── 4) Layer2 解除（§04ゲートのUIから・§04/§08が対象）──
   const code = todayCode()
   const typed = await page.evaluate((c) => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('プラン説明'))
@@ -151,24 +182,6 @@ const TRAINING = [
   })
   await page.waitForTimeout(2500)
   ok('Layer2 解除（§04ゲート入力→解除）', typed)
-
-  for (const [title, staff] of TRAINING) {
-    const r = await page.evaluate(([tt, st]) => {
-      const tEl = [...document.querySelectorAll('p')].find((e) => e.textContent.trim() === tt)
-      if (!tEl) return { found: false }
-      const sib = tEl.nextElementSibling
-      const want = `担当：${st}`
-      if (!sib || sib.textContent.trim() !== want)
-        return { found: true, staff: false, actual: sib ? sib.textContent.trim() : '(なし)' }
-      // 語中改行チェック: 行数と、行末が名前の途中（かな括弧の内側で開き括弧直後以外）で割れていないか
-      const rect = sib.getBoundingClientRect()
-      const overflowX = rect.right > window.innerWidth + 1
-      const clipped = sib.scrollWidth > sib.clientWidth + 1
-      return { found: true, staff: true, overflowX, clipped }
-    }, [title, staff])
-    ok(`§09 ${title} → 担当：${staff}`, !!(r.found && r.staff && !r.overflowX && !r.clipped),
-      r.found ? (r.staff ? '' : `不一致: ${r.actual}`) : 'タイトルなし')
-  }
 
   // §09 スクショ
   await page.evaluate(() => {

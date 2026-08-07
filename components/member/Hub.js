@@ -5,7 +5,7 @@ import { pad2 } from '@/lib/format'
 /**
  * ハブ（§5・hero 直下の核）。12 セクションのタイルグリッド。
  * タイルタップ → #sec-NN へ smooth scroll。
- * 準備中タイル=金「準備中」ピル＋opacity0.7。保護3セクション（プラン説明・製品・トレーニング）=金鍵。
+ * 準備中タイル=金「準備中」ピル＋opacity0.7。保護2セクション（プラン説明・製品）=金鍵。
  */
 export default function Hub({ sections }) {
   return (
@@ -21,7 +21,7 @@ export default function Hub({ sections }) {
           {sections.map((s) => {
             const num = pad2(s.sort_order)
             const soon = s.status === 'coming_soon'
-            const isProtected = ['plan_intro', 'products', 'training'].includes(s.key)
+            const isProtected = ['plan_intro', 'products'].includes(s.key)
             return (
               <a
                 key={s.key}

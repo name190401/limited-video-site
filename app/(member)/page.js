@@ -71,7 +71,7 @@ export default async function MemberHome() {
         steps={[
           { label: 'メニューから見たい項目へ', desc: '右上のメニュー、またはハブから各セクションに飛べます。' },
           { label: '動画はタップで再生', desc: '気になる動画をタップするとその場で再生します。' },
-          { label: '保護動画は合言葉で解除', desc: 'プラン説明・製品・トレーニングは紹介者から合言葉を聞いて開きます。' },
+          { label: '保護動画は合言葉で解除', desc: 'プラン説明・製品は紹介者から合言葉を聞いて開きます。' },
         ]}
         video={publishedVideos(v('how_to_use'))[0] || null}
       />

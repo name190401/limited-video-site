@@ -1,4 +1,4 @@
-// Layer2 3セクション共有ゲート＋公開コンテンツ＋抑止パッケージ＋ログアウトの総合検証。headless Chrome 直駆動。
+// Layer2 2セクション共有ゲート＋公開コンテンツ＋抑止パッケージ＋ログアウトの総合検証。headless Chrome 直駆動。
 // 使い方: QCODE=<当日コード> NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-layer2.cjs [width]
 // 当日コードを渡さない場合は .env.local の PASSWORD_SECRET_KEY から自動算出する。
 const { chromium } = require('playwright')
@@ -9,9 +9,9 @@ const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = process.env.BASE || 'http://localhost:3100'
 
 const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
-const PRODUCT_IDS = ['tuSEuVC6SQU', 'PKTwEWA5n3A', 'XOo-ifRXVBw']
-const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'B_Cd-YQ1h30']
-const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS, ...TRAINING_IDS]
+const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw']
+const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I'] // Layer1（2026-08-05 要望で Layer2 解除）
+const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS]
 const BONUS_IDS = ['c8DiLN6lVsY', '1k9wXYFFOVU']
 
 function todayCode() {
@@ -88,11 +88,24 @@ const shot = async (page, report, tag) => {
   // 1) 初期ペイロードに保護IDが無い
   const html = await page.content()
   const leaked = PROTECTED_IDS.filter((id) => html.includes(id))
-  check('初期ペイロードに保護16IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
+  check('初期ペイロードに保護7IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
+  const trainingVisible = TRAINING_IDS.filter((id) => html.includes(id))
+  check('未解除でも§09トレーニング9IDが初期ペイロードに出る（Layer1化）', trainingVisible.length === 9, `${trainingVisible.length}/9`)
 
-  // 2) 未解除でゲート3つ（§04/§08/§09）
+  // 2) 未解除でゲート2つ（§04/§08）
   const gates = await gateCount(page)
-  check('未解除ゲート数=3', gates === 3, `gates=${gates}`)
+  check('未解除ゲート数=2', gates === 2, `gates=${gates}`)
+
+  const trainingLocked = await sectionInfo(page, 'トレーニング')
+  const trainingLockedGate = await page.evaluate(() => {
+    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('トレーニング'))
+    const sec = h ? (h.closest('section') || h.parentElement) : null
+    return sec ? sec.querySelectorAll('input[placeholder="合言葉"]').length : -1
+  })
+  const trainingLockedFound = TRAINING_IDS.filter((id) => trainingLocked.ids.includes(id))
+  check('未解除の§09は合言葉入力0・サムネ9本・準備中0',
+    trainingLockedGate === 0 && trainingLockedFound.length === 9 && !/準備中/.test(trainingLocked.text),
+    JSON.stringify({ gate: trainingLockedGate, found: trainingLockedFound.length }))
 
   const bonusLocked = await sectionInfo(page, 'ボーナス（インカム）')
   const bonusFound = BONUS_IDS.filter((id) => bonusLocked.ids.includes(id))
@@ -124,7 +137,7 @@ const shot = async (page, report, tag) => {
   await page.waitForTimeout(2500)
 
   const gatesAfter = await gateCount(page)
-  check('解除後ゲート数=0（3セクション同時解除）', gatesAfter === 0, `gates=${gatesAfter}`)
+  check('解除後ゲート数=0（2セクション同時解除）', gatesAfter === 0, `gates=${gatesAfter}`)
 
   const plan = await sectionInfo(page, 'プラン説明')
   const planFound = PLAN_IDS.filter((id) => plan.ids.includes(id))
@@ -143,7 +156,7 @@ const shot = async (page, report, tag) => {
     const tabs = [...sec.querySelectorAll('button')].map((b) => b.textContent.trim())
     return { ok: true, tabs }
   })
-  const expectedProductTabs = ['パーソナル', 'プロダクト全14品', 'BELLEQUAGE']
+  const expectedProductTabs = ['パーソナル', 'プロダクト全15品', 'BELLEQUAGE']
   const productViews = []
   for (let i = 0; i < expectedProductTabs.length; i++) {
     const label = expectedProductTabs[i]
@@ -170,7 +183,7 @@ const shot = async (page, report, tag) => {
   check('§08製品の3タブと各タブ対応動画1本', productTabsExact && productViewsExact, JSON.stringify({ tabs: productTabs.tabs, views: productViews }))
   await shot(page, report, '08-products')
 
-  // 5) §09 トレーニング: 準備中なし、公開9本
+  // 5) §09 トレーニング: 準備中なし、公開9本（Layer1化後も不変であること）
   const training = await page.evaluate(() => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('トレーニング'))
     if (!h) return { ok: false }
