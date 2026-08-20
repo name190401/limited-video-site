@@ -82,7 +82,7 @@ export default async function MemberHome() {
         videos={v('kitamura')}
         desired={1}
       />
-      <ComplianceSection />
+      <ComplianceSection videos={v('compliance')} />
       <FaqSection faqs={faqs} />
 
       <Footer />

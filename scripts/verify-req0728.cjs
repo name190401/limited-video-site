@@ -1,5 +1,5 @@
 // 追加要望7/28の実測検証（headless Chrome）。
-// §12副業・§13法令遵守・§14 FAQ、§08製品3タブ、§09担当変更、PDF会員ゲートを確認する。
+// §12副業・§13法令遵守・§14 FAQ、§08製品タブ、§09担当変更、PDF会員ゲートを確認する。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0728.cjs
 const { chromium } = require('playwright')
 const crypto = require('crypto')
@@ -8,9 +8,9 @@ const path = require('path')
 
 const BASE = process.env.BASE || 'http://localhost:3100'
 const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
-const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw']
-const PRODUCT_TABS = ['パーソナル', 'プロダクト全15品', 'BELLEQUAGE']
-const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I']
+const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw', 'cbi5ySSheBA']
+const PRODUCT_TABS = ['パーソナル', '全15品', 'BELLEQUAGE', 'インナーケア']
+const TRAINING_IDS = ['MSmZCalPv8k', '_dI-H_n7-Hs', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I']
 const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS]
 
 function todayCode() {
@@ -98,7 +98,7 @@ function todayCode() {
 
   const initialHtml = await page.evaluate(async () => (await fetch('/', { credentials: 'same-origin' })).text())
   const leaked = PROTECTED_IDS.filter((id) => initialHtml.includes(id))
-  check('8. 初期HTMLに保護7IDなし', leaked.length === 0, leaked.join(',') || 'clean')
+  check(`8. 初期HTMLに保護${PROTECTED_IDS.length}IDなし`, leaked.length === 0, leaked.join(',') || 'clean')
   const trainingInHtml = TRAINING_IDS.filter((id) => initialHtml.includes(id))
   check('8b. 初期HTMLに§09トレーニング9IDが有る（Layer1化）', trainingInHtml.length === 9, `${trainingInHtml.length}/9`)
 
@@ -131,7 +131,7 @@ function todayCode() {
     const sec = document.querySelector('#sec-08')?.closest('section')
     return [...(sec?.querySelectorAll('button') || [])].map((b) => b.textContent.trim())
   })
-  check('10. §08製品タブ3ラベル', PRODUCT_TABS.every((label) => tabs.includes(label)) && tabs.filter((label) => PRODUCT_TABS.includes(label)).length === 3, JSON.stringify(tabs))
+  check(`10. §08製品タブ${PRODUCT_TABS.length}ラベル`, PRODUCT_TABS.every((label) => tabs.includes(label)) && tabs.filter((label) => PRODUCT_TABS.includes(label)).length === PRODUCT_TABS.length, JSON.stringify(tabs))
 
   const observedIds = new Set()
   const productViews = []
@@ -166,7 +166,7 @@ function todayCode() {
     .filter(Boolean))
   visibleProtected.forEach((id) => observedIds.add(id))
   const missing = PROTECTED_IDS.filter((id) => !observedIds.has(id))
-  check('12. 解除後の保護動画7IDを確認', missing.length === 0, missing.join(',') || 'all 7')
+  check(`12. 解除後の保護動画${PROTECTED_IDS.length}IDを確認`, missing.length === 0, missing.join(',') || `all ${PROTECTED_IDS.length}`)
 
   const pdfUrl = new URL('/docs/compliance.pdf', BASE)
   const guestPdf = await fetch(pdfUrl, { redirect: 'manual' })

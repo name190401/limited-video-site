@@ -9,8 +9,8 @@ const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = process.env.BASE || 'http://localhost:3100'
 
 const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
-const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw']
-const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I'] // Layer1（2026-08-05 要望で Layer2 解除）
+const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw', 'cbi5ySSheBA']
+const TRAINING_IDS = ['MSmZCalPv8k', '_dI-H_n7-Hs', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I'] // Layer1（2026-08-05 要望で Layer2 解除）
 const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS]
 const BONUS_IDS = ['c8DiLN6lVsY', '1k9wXYFFOVU']
 
@@ -88,7 +88,7 @@ const shot = async (page, report, tag) => {
   // 1) 初期ペイロードに保護IDが無い
   const html = await page.content()
   const leaked = PROTECTED_IDS.filter((id) => html.includes(id))
-  check('初期ペイロードに保護7IDが無い', leaked.length === 0, leaked.join(',') || 'clean')
+  check(`初期ペイロードに保護${PROTECTED_IDS.length}IDが無い`, leaked.length === 0, leaked.join(',') || 'clean')
   const trainingVisible = TRAINING_IDS.filter((id) => html.includes(id))
   check('未解除でも§09トレーニング9IDが初期ペイロードに出る（Layer1化）', trainingVisible.length === 9, `${trainingVisible.length}/9`)
 
@@ -147,7 +147,7 @@ const shot = async (page, report, tag) => {
   await scrollToHeading(page, 'プラン説明'); await page.waitForTimeout(700)
   await shot(page, report, '04-unlocked')
 
-  // 4) §08 製品: 3タブの存在＋各タブで対応する動画1本だけを描画
+  // 4) §08 製品: 全タブの存在＋各タブで対応する動画1本だけを描画
   const productTabs = await page.evaluate(() => {
     const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('製品'))
     if (!h) return { ok: false }
@@ -156,7 +156,7 @@ const shot = async (page, report, tag) => {
     const tabs = [...sec.querySelectorAll('button')].map((b) => b.textContent.trim())
     return { ok: true, tabs }
   })
-  const expectedProductTabs = ['パーソナル', 'プロダクト全15品', 'BELLEQUAGE']
+  const expectedProductTabs = ['パーソナル', '全15品', 'BELLEQUAGE', 'インナーケア']
   const productViews = []
   for (let i = 0; i < expectedProductTabs.length; i++) {
     const label = expectedProductTabs[i]
@@ -177,10 +177,10 @@ const shot = async (page, report, tag) => {
     productViews.push({ label, clicked, ids })
   }
   const productTabsExact = expectedProductTabs.every((label) => productTabs.tabs?.includes(label))
-    && productTabs.tabs?.filter((label) => expectedProductTabs.includes(label)).length === 3
+    && productTabs.tabs?.filter((label) => expectedProductTabs.includes(label)).length === expectedProductTabs.length
   const productViewsExact = productViews.every((view, i) =>
     view.clicked && view.ids.length === 1 && view.ids[0] === PRODUCT_IDS[i])
-  check('§08製品の3タブと各タブ対応動画1本', productTabsExact && productViewsExact, JSON.stringify({ tabs: productTabs.tabs, views: productViews }))
+  check(`§08製品の${expectedProductTabs.length}タブと各タブ対応動画1本`, productTabsExact && productViewsExact, JSON.stringify({ tabs: productTabs.tabs, views: productViews }))
   await shot(page, report, '08-products')
 
   // 5) §09 トレーニング: 準備中なし、公開9本（Layer1化後も不変であること）

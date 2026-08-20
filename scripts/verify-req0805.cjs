@@ -18,10 +18,10 @@ const NEW_PRODUCT = '4gJvVLprXJg'
 const OLD_PRODUCT = 'PKTwEWA5n3A'
 const OLD_PRODUCT_TAB = 'プロダクト全14品'
 const OLD_PRODUCT_TITLE = '製品（プロダクト全14品）'
-const PRODUCT_TABS = ['パーソナル', 'プロダクト全15品', 'BELLEQUAGE']
-const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw']
+const PRODUCT_TABS = ['パーソナル', '全15品', 'BELLEQUAGE', 'インナーケア']
+const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw', 'cbi5ySSheBA']
 const PROTECTED_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE', ...PRODUCT_IDS]
-const TRAINING_IDS = ['MSmZCalPv8k', 'Ps3ZD2amsAw', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', NEW_WELFARE]
+const TRAINING_IDS = ['MSmZCalPv8k', '_dI-H_n7-Hs', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', NEW_WELFARE]
 
 function envText() {
   return fs.readFileSync(path.join(__dirname, '..', '.env.local'), 'utf8')
@@ -105,7 +105,7 @@ const scrollToSection = (page, num) => page.evaluate((n) => {
 
   const rawTraining = TRAINING_IDS.filter((id) => rawHtml.includes(id))
   const rawProtected = PROTECTED_IDS.filter((id) => rawHtml.includes(id))
-  check('8. 未解除の生HTMLにtraining9IDが有り保護7IDが無い', rawTraining.length === 9 && rawProtected.length === 0, JSON.stringify({ training: rawTraining.length, protected: rawProtected }))
+  check(`8. 未解除の生HTMLにtraining9IDが有り保護${PROTECTED_IDS.length}IDが無い`, rawTraining.length === 9 && rawProtected.length === 0, JSON.stringify({ training: rawTraining.length, protected: rawProtected }))
 
   const locked = await page.evaluate(() => {
     const tiles = [...document.querySelectorAll('#hub a[href^="#sec-"]')]
@@ -145,7 +145,7 @@ const scrollToSection = (page, num) => page.evaluate((n) => {
     const sec = document.querySelector('#sec-08')?.closest('section')
     return [...(sec?.querySelectorAll('button') || [])].map((b) => b.textContent.trim())
   })
-  check('3. §08タブラベルがプロダクト全15品（旧ラベル0件）', unlocked && PRODUCT_TABS.every((label) => tabs.includes(label)) && !tabs.includes(OLD_PRODUCT_TAB), JSON.stringify(tabs))
+  check('3. §08タブラベルが全15品（旧ラベル0件）', unlocked && PRODUCT_TABS.every((label) => tabs.includes(label)) && tabs.filter((label) => PRODUCT_TABS.includes(label)).length === PRODUCT_TABS.length && !tabs.includes(OLD_PRODUCT_TAB), JSON.stringify(tabs))
 
   const clicked = await page.evaluate((label) => {
     const sec = document.querySelector('#sec-08')?.closest('section')
@@ -181,7 +181,10 @@ const scrollToSection = (page, num) => page.evaluate((n) => {
   }, adminPassword)
   await adminPage.goto(`${BASE}/admin`, { waitUntil: 'networkidle', timeout: 90000 })
   const adminText = await adminPage.evaluate(() => document.body.textContent)
-  check('11. /admin説明文が「プラン説明・製品（§04・§08）」', adminText.includes('プラン説明・製品（§04・§08）を解除するための6桁コードです。') && !adminText.includes('トレーニング'), adminText)
+  // 証跡に adminText 全文を出さない（当日の6桁コードと会員合言葉が含まれるため。判定条件は不変）
+  const adminHit = adminText.includes('プラン説明・製品（§04・§08）を解除するための6桁コードです。')
+  check('11. /admin説明文が「プラン説明・製品（§04・§08）」', adminHit && !adminText.includes('トレーニング'),
+    JSON.stringify({ 説明文一致: adminHit, トレーニング残存: adminText.includes('トレーニング'), len: adminText.length }))
 
   await adminCtx.close()
   await browser.close()

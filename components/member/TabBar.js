@@ -8,11 +8,12 @@
  * @param {string}   active      選択中の key
  * @param {Function} onChange    (key) => void
  * @param {boolean}  scrollable  タブが多いとき横スクロール（クロージング）
+ * @param {boolean}  compact     タブ間隔を詰める（375px で4タブを初期表示に収めるため。§08 製品のみ）
  */
-export default function TabBar({ tabs, active, onChange, scrollable = false }) {
+export default function TabBar({ tabs, active, onChange, scrollable = false, compact = false }) {
   return (
     <div
-      className={`flex gap-4 border-b border-navy-200 mb-5 ${
+      className={`flex ${compact ? 'gap-3' : 'gap-4'} border-b border-navy-200 mb-5 ${
         scrollable ? 'scroll-strip overflow-x-auto' : ''
       }`.trim()}
     >

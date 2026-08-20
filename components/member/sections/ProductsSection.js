@@ -44,6 +44,7 @@ export default function ProductsSection({ videos = [] }) {
               active={tab}
               onChange={setTab}
               scrollable={published.length >= 3}
+              compact={tabs.length >= 4}
             />
           )}
           <div key={tab} className="grid grid-cols-1 gap-4 animate-fade-in">
