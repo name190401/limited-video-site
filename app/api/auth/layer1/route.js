@@ -5,6 +5,8 @@ import { issueAdminCookieValue, adminCookieOptions, ADMIN_COOKIE } from '@/lib/a
 import { checkAndIncrement, clientIp } from '@/lib/ratelimit';
 import { getJstDateString } from '@/lib/date';
 import { logLogin } from '@/lib/logs';
+import { SettingsUnavailableError, getPasswordVersion } from '@/lib/settings';
+import { ADMIN_PV_KEY, SITE_PV_KEY } from '@/lib/auth/session-version';
 
 export const runtime = 'nodejs';
 
@@ -49,12 +51,25 @@ export async function POST(request) {
       ua: request.headers.get('user-agent') || null,
     });
     const res = NextResponse.json({ success: true, role: isAdmin ? 'admin' : 'member' });
-    res.cookies.set(LAYER1_COOKIE, await issueLayer1CookieValue(), layer1CookieOptions());
+    // 発行する pv は必ずフェイルクローズで読む。照合用の readPasswordVersion は読めないと
+    // 0 を返すため、それを載せた Cookie は現行世代が 1 以上のとき即座に弾かれてしまう
+    // （ログインは 200 なのに次のリクエストで /enter へ戻される）。読めなければ 503。
+    const [sitePv, adminPv] = await Promise.all([
+      getPasswordVersion(SITE_PV_KEY),
+      isAdmin ? getPasswordVersion(ADMIN_PV_KEY) : Promise.resolve(0),
+    ]);
+    res.cookies.set(LAYER1_COOKIE, await issueLayer1CookieValue(sitePv), layer1CookieOptions());
     if (isAdmin) {
-      res.cookies.set(ADMIN_COOKIE, await issueAdminCookieValue(), adminCookieOptions());
+      res.cookies.set(ADMIN_COOKIE, await issueAdminCookieValue(adminPv), adminCookieOptions());
     }
     return res;
-  } catch {
+  } catch (err) {
+    if (err instanceof SettingsUnavailableError || err?.name === 'SettingsUnavailableError') {
+      return NextResponse.json(
+        { success: false, error: 'service_unavailable' },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ success: false, error: 'server_error' }, { status: 500 });
   }
 }

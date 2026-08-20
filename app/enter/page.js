@@ -1,7 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+function PasswordChangedNoticeContent() {
+  const searchParams = useSearchParams();
+
+  if (searchParams.get('e') !== 'pw') return null;
+
+  return (
+    <p className="mb-4 text-sm text-gold-200">
+      合言葉が変更されました。新しい合言葉を入力してください。
+    </p>
+  );
+}
+
+function PasswordChangedNotice() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  return mounted ? <PasswordChangedNoticeContent /> : null;
+}
 
 export default function EnterPage() {
   const router = useRouter();
@@ -24,6 +44,8 @@ export default function EnterPage() {
         router.refresh();
       } else if (res.status === 429) {
         setError('試行回数が多すぎます。しばらく時間をおいてお試しください。');
+      } else if (res.status === 503) {
+        setError('ただいまログインできません。しばらく時間をおいてお試しください。');
       } else {
         setError('パスワードが違います');
       }
@@ -55,6 +77,11 @@ export default function EnterPage() {
         <p className="mt-2 text-navy-100 text-[13px] font-sansjp tracking-[0.08em]">メンバーページ</p>
 
         <form onSubmit={handleSubmit} className="mt-10">
+          {!error && (
+            <Suspense fallback={null}>
+              <PasswordChangedNotice />
+            </Suspense>
+          )}
           <label className="block text-left text-navy-100 text-[12px] mb-2 tracking-[0.06em] font-sansjp">
             合言葉（パスワード）
           </label>

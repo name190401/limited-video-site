@@ -63,12 +63,207 @@ function CopyButton({ value, className = '' }) {
   )
 }
 
+const PASSWORD_ERRORS = {
+  missing: '新しいパスワードを入力してください',
+  mismatch: '2回の入力が一致しません',
+  whitespace: '前後に空白は使えません',
+  length: '8〜64文字で入力してください',
+  charset: '半角の英数字と記号のみ使えます（空白は使えません）',
+  same_as_current: '現在と同じです',
+  conflict: '会員合言葉と管理者パスワードは同じにできません',
+}
+
+function PasswordSection({ target, value, updatedAt }) {
+  const router = useRouter()
+  const isAdmin = target === 'admin'
+  const [editing, setEditing] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [next, setNext] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [current, setCurrent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  const closeForm = () => {
+    setEditing(false)
+    setNext('')
+    setConfirm('')
+    setCurrent('')
+  }
+
+  const submit = async (event) => {
+    event.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setMessage('')
+    setSuccess(false)
+    try {
+      const response = await fetch('/api/admin/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target, current, next, confirm }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (response.ok) {
+        setSuccess(true)
+        setMessage(
+          isAdmin
+            ? '変更しました。この管理者パスワードでログイン中の端末は、すべて再ログインが必要になります。'
+            : '変更しました。この合言葉でログイン中の端末は、すべて再ログインが必要になります。'
+        )
+        closeForm()
+        router.refresh()
+      } else if (response.status === 503 || data.error === 'service_unavailable') {
+        setMessage('データベースに接続できないため変更できませんでした。時間をおいてお試しください。')
+      } else if (response.status === 401) {
+        setMessage(
+          data.error === 'invalid_current'
+            ? '現在の管理者パスワードが違います'
+            : 'セッションが切れました。ログインし直してください'
+        )
+      } else if (response.status === 429) {
+        setMessage('試行回数が多すぎます。しばらく時間をおいてお試しください。')
+      } else {
+        setMessage(PASSWORD_ERRORS[data.error] || '変更できませんでした。もう一度お試しください。')
+      }
+    } catch {
+      setMessage('通信エラーが発生しました。もう一度お試しください。')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const actionClass =
+    'shrink-0 rounded-lg border border-gold-400/40 px-3 py-1.5 text-[12px] font-sansjp tracking-[0.06em] text-gold-200 transition-colors hover:border-gold-400 hover:text-gold-100'
+  const inputClass =
+    'w-full rounded-xl border border-gold-400/30 bg-navy-900/60 px-4 py-3 text-[14px] text-white placeholder-navy-300 focus:border-gold-400 focus:outline-none disabled:opacity-50'
+
+  return (
+    <section className="mt-10">
+      <p className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
+        {isAdmin ? 'Admin Password' : 'Member Password'}
+      </p>
+      <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">
+        {isAdmin ? '管理者パスワード' : '会員合言葉（サイト共通パスワード）'}
+      </h2>
+      <p className="mt-1 text-[11px] font-sansjp text-navy-300">
+        最終変更：{updatedAt ? fmtJst(updatedAt) : '—（初期値）'}
+      </p>
+      <div className="mt-3 rounded-2xl border border-gold-500/25 bg-navy-800/40 px-4 py-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="min-w-0 flex-1 break-all font-cinzel text-[20px] tracking-[0.1em] text-gold-200">
+            {isAdmin && !visible ? '••••••••' : value}
+          </span>
+          {isAdmin && (
+            <button type="button" onClick={() => setVisible((shown) => !shown)} className={actionClass}>
+              {visible ? '隠す' : '表示'}
+            </button>
+          )}
+        </div>
+        <div className="mt-3 flex justify-end gap-2">
+          <CopyButton value={value} />
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(true)
+              setMessage('')
+              setSuccess(false)
+            }}
+            className={actionClass}
+          >
+            変更
+          </button>
+        </div>
+      </div>
+
+      {editing && (
+        <form onSubmit={submit} className="mt-3 space-y-3 rounded-2xl border border-gold-500/25 bg-navy-800/40 p-4">
+          <input
+            type="password"
+            value={next}
+            onChange={(event) => setNext(event.target.value)}
+            placeholder={isAdmin ? '新しい管理者パスワード' : '新しい合言葉'}
+            autoComplete="new-password"
+            disabled={submitting}
+            className={inputClass}
+          />
+          <input
+            type="password"
+            value={confirm}
+            onChange={(event) => setConfirm(event.target.value)}
+            placeholder="確認のためもう一度"
+            autoComplete="new-password"
+            disabled={submitting}
+            className={inputClass}
+          />
+          <input
+            type="password"
+            value={current}
+            onChange={(event) => setCurrent(event.target.value)}
+            placeholder="現在の管理者パスワード"
+            autoComplete="current-password"
+            disabled={submitting}
+            className={inputClass}
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-gold min-w-0 flex-1 rounded-xl px-3 py-2.5 font-sansjp text-[13px] font-semibold disabled:opacity-50"
+            >
+              {submitting ? '変更中…' : '変更する'}
+            </button>
+            <button
+              type="button"
+              onClick={closeForm}
+              disabled={submitting}
+              className="min-w-0 flex-1 rounded-xl border border-gold-400/40 px-3 py-2.5 font-sansjp text-[13px] text-gold-200 disabled:opacity-50"
+            >
+              やめる
+            </button>
+          </div>
+        </form>
+      )}
+      {message && (
+        <p className={`mt-3 text-[12px] font-sansjp leading-relaxed ${success ? 'text-gold-200' : 'text-rose-300'}`}>
+          {message}
+        </p>
+      )}
+      <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
+        {isAdmin
+          ? '管理画面へのログインに使うパスワードです。'
+          : 'メンバーがサイトに入るための共通パスワードです（入口の「合言葉」）。日替わりではありません。'}
+      </p>
+      {/* ※ が前段落の行末に取り残されないよう、注意書きは独立した段落にする。 */}
+      {isAdmin && (
+        <p className="mt-2 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
+          ※伏字は覗き見防止のみで、この画面のソースには値が含まれます。共有画面での表示にご注意ください。
+        </p>
+      )}
+    </section>
+  )
+}
+
 /**
- * 管理ダッシュボード。日替わり Layer2 コード（今日＋今後6日）と会員合言葉を表示。
+ * 管理ダッシュボード。日替わり Layer2 コード（今日＋今後6日）・会員合言葉・管理者
+ * パスワードを表示し、後ろ2つはその場で変更できる（PasswordSection）。
  * @param {{date:string,code:string}[]} days  先頭が今日（JST）
- * @param {string} sitePassword
+ * @param {string} sitePassword  会員共通合言葉の現在値
+ * @param {string} adminPassword 管理者パスワードの現在値（既定は伏字表示）
+ * @param {string|null} sitePasswordUpdatedAt  settings 行の updated_at。null＝初期値のまま
+ * @param {string|null} adminPasswordUpdatedAt 同上
  */
-export default function AdminDashboard({ days, sitePassword, loginEvents, playStats, logsEnabled }) {
+export default function AdminDashboard({
+  days,
+  sitePassword,
+  adminPassword,
+  sitePasswordUpdatedAt,
+  adminPasswordUpdatedAt,
+  loginEvents,
+  playStats,
+  logsEnabled,
+}) {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const today = days[0]
@@ -180,22 +375,9 @@ export default function AdminDashboard({ days, sitePassword, loginEvents, playSt
           </ul>
         </section>
 
-        {/* 会員合言葉 */}
-        <section className="mt-10">
-          <p className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
-            Member Password
-          </p>
-          <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">会員合言葉（サイト共通パスワード）</h2>
-          <div className="mt-3 flex items-center gap-3 rounded-2xl border border-gold-500/25 bg-navy-800/40 px-4 py-4">
-            <span className="flex-1 break-all font-cinzel text-[20px] tracking-[0.1em] text-gold-200">
-              {sitePassword}
-            </span>
-            <CopyButton value={sitePassword} />
-          </div>
-          <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
-            メンバーがサイトに入るための共通パスワードです（入口の「合言葉」）。日替わりではありません。
-          </p>
-        </section>
+        <PasswordSection target="site" value={sitePassword} updatedAt={sitePasswordUpdatedAt} />
+
+        <PasswordSection target="admin" value={adminPassword} updatedAt={adminPasswordUpdatedAt} />
 
         {/* 動画再生回数 */}
         <section className="mt-10">

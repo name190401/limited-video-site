@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyPlanToken, PLAN_COOKIE } from '@/lib/auth/layer2';
-import { verifyLayer1CookieValue, LAYER1_COOKIE } from '@/lib/auth/layer1';
+import { readLayer1Payload, LAYER1_COOKIE } from '@/lib/auth/layer1';
+import { isVersionCurrent, readPasswordVersion, SITE_PV_KEY } from '@/lib/auth/session-version';
 import { getProtectedVideos } from '@/lib/content';
 
 export const runtime = 'nodejs';
@@ -14,11 +15,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   const layer1Token = request.cookies.get(LAYER1_COOKIE)?.value;
   const planToken = request.cookies.get(PLAN_COOKIE)?.value;
-  const [layer1Ok, planOk] = await Promise.all([
-    verifyLayer1CookieValue(layer1Token),
+  const [layer1Payload, planOk] = await Promise.all([
+    readLayer1Payload(layer1Token),
     verifyPlanToken(planToken),
   ]);
-  if (!layer1Ok || !planOk) {
+  const currentVersion = layer1Payload
+    ? await readPasswordVersion(SITE_PV_KEY)
+    : 0;
+  if (!layer1Payload || !isVersionCurrent(layer1Payload, currentVersion) || !planOk) {
     return NextResponse.json(
       { error: 'unauthorized' },
       { status: 401, headers: { 'Cache-Control': 'no-store' } }

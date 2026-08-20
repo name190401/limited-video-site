@@ -24,8 +24,8 @@ npm run dev                  # http://localhost:3000
 
 | 変数名 | 必須 | 説明 |
 |--------|------|------|
-| `SITE_PASSWORD` | ✅ | Layer1 の会員共通合言葉 |
-| `ADMIN_PASSWORD` | ✅ | 管理画面（`/admin`）用 |
+| `SITE_PASSWORD` | ✅ | Layer1 の会員共通合言葉。**初期値**（下記の注意参照） |
+| `ADMIN_PASSWORD` | ✅ | 管理画面（`/admin`）用。**初期値**（下記の注意参照） |
 | `PASSWORD_SECRET_KEY` | ✅ | 日替わり6桁コードの生成キー |
 | `SESSION_SECRET` | ✅ | Layer1 Cookie の署名鍵 |
 | `PLAN_TOKEN_SECRET` | ✅ | Layer2 トークンの署名鍵 |
@@ -34,6 +34,8 @@ npm run dev                  # http://localhost:3000
 | `ENABLE_ACCESS_LOGS` | ✅ | `true` でログ記録を有効化。**ローカル検証時は必ず `false`** |
 
 > ⚠️ `USE_LOCAL_CONTENT` を `false` にすると Supabase からコンテンツを読みにいくが、**DB スキーマは現行構成に追随していない**（`videos` に `tab_label` 列が無い、`compliance`／`kitamura` セクション行が無い、動画 id 34・35 が無い）。**`true` のまま運用すること。**
+
+> ⚠️ `SITE_PASSWORD` / `ADMIN_PASSWORD` は **DB（`settings` テーブル）が正本**で、環境変数は**行が無いときのブートストラップ値**にすぎない。`/admin` から一度でも変更すると DB 側が優先され、環境変数を書き換えても反映されない。現在値の確認・変更はすべて `/admin` で行う。
 
 ## コンテンツの編集
 
@@ -57,10 +59,24 @@ vid(id, section_key, title, sort_order, {
 
 ## 認証の仕組み（2層・実装済み）
 
-- **Layer1**：`SITE_PASSWORD` をサーバー照合 → 署名付き HttpOnly セッション Cookie（`qualia_site`・exp 12時間）→ `middleware.js` が Edge 互換（Web Crypto）で全ルート検証。`/enter` と `/admin` 以外は未認証で 307
+- **Layer1**：会員共通合言葉をサーバー照合 → 署名付き HttpOnly セッション Cookie（`qualia_site`・exp 12時間）→ `middleware.js` が Edge 互換（Web Crypto）で全ルート検証。`/enter` と `/admin` 以外は未認証で 307
 - **Layer2**：日替わり6桁コード＝`SHA256(PASSWORD_SECRET_KEY + JST日付 + グループ番号)` から紛らわしい文字を除いて生成（`lib/password.js`・**DB 不要**）。照合成功で **JST 24:00 失効の HMAC トークン**（`qualia_plan`）を発行し、保護動画の実IDは `/api/plan/content` からのみ配信
 - **日付基準は JST**（`lib/date.js` が単一の真実）
 - **入口は `/enter` に一本化**。会員／管理者を同一エンドポイントで判定し、管理者なら両方の Cookie を発行する
+
+### パスワードの保存場所と、変更したときの失効（2026-08-20 追加）
+
+- **正本は Supabase の `settings` テーブル**（`site_password` / `admin_password`）。行が無いときだけ環境変数にフォールバックする（`lib/settings.js`）
+- **DB に到達できないときは環境変数へ落とさず例外**（`SettingsUnavailableError`）にし、ログインは **503** で拒否する。フォールバックさせると「管理画面で変更したはずの古いパスワード」が復活するため
+- **世代番号による即時失効**：`settings` の `site_password_version` / `admin_password_version` を変更のたびに +1 し、Cookie の payload に載せた `pv` と照合する（`lib/auth/session-version.js`）。古い `pv` の Cookie は `middleware.js`・`/api/plan/content`・`/api/log/play`・`/admin` で弾かれる
+  - `middleware.js` は Edge ランタイムで `@supabase/supabase-js` を使えないため、世代の読み取りだけ **REST を `fetch`** する専用モジュールにしてある。**`lib/settings.js` を middleware から import しないこと**（Edge で動かない supabase-js を引き込むため。`server-only-guard` は `window` があるときだけ throw するので Edge では止めてくれない）
+  - **この `fetch` には 1.5 秒のタイムアウトが必須**（`AbortSignal.timeout`）。middleware は matcher 配下の全リクエストで走るので、Supabase が「エラーも返さず応答しない」状態になるとサイト全体が固まる（タイムアウト無しで 240 秒無応答を実測済み）
+  - **Cookie を発行する経路と世代を +1 する経路では `readPasswordVersion` を使わない**。あちらは読めないと 0 を返すため、発行時に使うと発行直後の Cookie が即失効し、更新時に使うと世代を巻き戻す。これらは `lib/settings.js` の `getPasswordVersion`（フェイルクローズ）を使う
+  - 世代は **30 秒キャッシュ**。したがって失効は「即時」ではなく**最大 30 秒以内**。DB 取得に失敗したときのフォールバック値は **5 秒**だけキャッシュする（障害中に middleware が全リクエストで往復し続けるのを防ぎつつ、復旧を長く引きずらないため）
+  - 照合は `pv >= 現行世代` で判定する（`===` にすると、キャッシュが古い isolate が発行直後の正しい Cookie を誤って弾く）
+  - **世代の読み取りはフェイルオープン**（DB 不達なら素通し）。ログイン照合のフェイルクローズと**意図的に非対称**にしてある。閉じると Supabase 停止時に閲覧中の全会員が即ログアウトになるため
+- **パスワード行と世代行は 1 回の upsert（＝1 ステートメント）で同時に書く**（`lib/settings.js` の `setSettings`）。片方だけ書けた状態＝「変更したのに失効していないが、同じ値では再変更できない」行き止まりを構造的に作らないため。**1 件だけ書く関数は意図的に置いていない**
+- `settings` に行が無く Cookie に `pv` も無い状態はどちらも 0 とみなされ、**この仕組みを載せたデプロイ自体では誰もログアウトされない**
 
 ## 検証
 
@@ -102,6 +118,8 @@ NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0817
 
 **管理者**：`/enter` で管理者パスワードを入力 → `/admin` で当日＋今後7日分のコード、会員合言葉、ログイン履歴、動画再生回数を確認
 
+**パスワードの変更**：`/admin` の「会員合言葉」「管理者パスワード」の各セクションにある「変更」から行う（`POST /api/admin/password`）。現在の管理者パスワードの再入力が必要。8〜64 文字・**半角の印字可能文字のみ**（全角は `/enter` の入力欄で打てないため拒否）。会員合言葉と管理者パスワードを同値にはできない（`app/api/auth/layer1/route.js` が管理者を先に判定するため、同値だと会員ログインが機能しなくなる）。変更すると**そのパスワードでログイン中の端末はすべて再ログインになる**（上記の世代失効）。Vercel の環境変数を触る必要はない。
+
 ## デプロイ
 
 **`git push origin main` で Vercel が自動デプロイする**（CLI 実行は不要）。環境変数は Vercel ダッシュボード → Settings → Environment Variables で設定済み。
@@ -114,6 +132,9 @@ NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0817
 - `/api/log/play` にレート制限が無い（認証済み会員によるDB増殖ベクトル・低リスク）
 - 管理 Cookie の payload に `exp` が無く、失効が Max-Age のみに依存している（Layer1/Layer2 とは非対称）
 - Supabase 無料枠は長期未アクセスで一時停止される。ダッシュボードから Restore すれば復旧する
+- パスワード変更後の失効は世代キャッシュ（30秒）の分だけ遅れる。厳密な即時失効が要るなら TTL を縮めるか、`invalidateVersionCache` をインスタンス間へ伝える仕組みが要る
+- `POST /api/admin/password` のレート制限も `USE_LOCAL_CONTENT=true` では素通し（1点目と同根。配線は入れてある）
+- Supabase が「エラーも返さず応答しない」状態のとき、**打ち切りが効くのは middleware の世代読み取りだけ**（1.5秒）。`lib/supabase/admin.js` 経由の supabase-js にはタイムアウトを入れていないので、ログイン・`/admin`・変更 API はプラットフォームの実行時間上限まで待って 504 になる（503 にはならない）。会員の閲覧は middleware 側が打ち切るので継続する
 
 ## ライセンス
 

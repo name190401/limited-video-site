@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { LAYER1_COOKIE, verifyLayer1CookieValue } from '@/lib/auth/layer1';
+import { LAYER1_COOKIE, readLayer1Payload } from '@/lib/auth/layer1';
+import { isVersionCurrent, readPasswordVersion, SITE_PV_KEY } from '@/lib/auth/session-version';
 
 /**
  * Layer1 ゲート：有効な共通パスワード Cookie が無ければ /enter へリダイレクト。
@@ -23,12 +24,20 @@ export async function middleware(request) {
   }
 
   const cookie = request.cookies.get(LAYER1_COOKIE)?.value;
-  const ok = await verifyLayer1CookieValue(cookie);
+  const payload = await readLayer1Payload(cookie);
 
-  if (!ok) {
+  if (!payload) {
     const url = request.nextUrl.clone();
     url.pathname = '/enter';
     url.search = '';
+    return NextResponse.redirect(url);
+  }
+
+  const currentVersion = await readPasswordVersion(SITE_PV_KEY);
+  if (!isVersionCurrent(payload, currentVersion)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/enter';
+    url.search = '?e=pw';
     return NextResponse.redirect(url);
   }
 
