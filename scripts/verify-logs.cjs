@@ -1,9 +1,9 @@
 // アクセスログ機能の E2E 検証（要: 稼働中 Supabase ＋ ENABLE_ACCESS_LOGS=true ＋ next start）
 // 1) 会員ログイン→login_events(kind=member) 2) 管理者ログイン→(kind=admin)
-// 3) Layer2解除(UI)→(kind=unlock) 4) /api/log/play→play_events 5) /admin に履歴・回数表示
+// 3) /api/log/play→play_events 4) /admin に履歴・回数表示
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-logs.cjs
 const { chromium } = require('playwright')
-const crypto = require('crypto')
+const { loginAsMember, loginAsAdmin } = require('./_login.cjs')
 const fs = require('fs')
 const path = require('path')
 const BASE = process.env.BASE || 'http://localhost:3100'
@@ -12,17 +12,6 @@ const env = fs.readFileSync(path.join(__dirname, '..', '.env.local'), 'utf8')
 const envVal = (k) => (env.match(new RegExp(`^${k}=(.*)$`, 'm')) || [])[1]?.trim()
 const SUPA_URL = envVal('NEXT_PUBLIC_SUPABASE_URL')
 const SUPA_KEY = envVal('SUPABASE_SERVICE_ROLE_KEY')
-
-function todayCode() {
-  const key = envVal('PASSWORD_SECRET_KEY')
-  const jst = new Date(Date.now() + 9 * 3600 * 1000)
-  const d = `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}-${String(jst.getUTCDate()).padStart(2, '0')}`
-  const hash = crypto.createHash('sha256').update(key + d + '0').digest('hex')
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let p = ''
-  for (let i = 0; i < 6; i++) p += chars[parseInt(hash.substr(i * 2, 2), 16) % chars.length]
-  return p
-}
 
 async function countRows(table, filter = {}) {
   const q = new URLSearchParams({ select: 'id', ...filter })
@@ -41,7 +30,6 @@ async function countRows(table, filter = {}) {
   const base = {
     member: await countRows('login_events', { kind: 'eq.member' }),
     admin: await countRows('login_events', { kind: 'eq.admin' }),
-    unlock: await countRows('login_events', { kind: 'eq.unlock' }),
     play: await countRows('play_events'),
   }
 
@@ -52,37 +40,12 @@ async function countRows(table, filter = {}) {
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
 
   // 1) 会員ログイン
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
+  await loginAsMember(page, BASE)
   await page.waitForTimeout(800)
   ok('会員ログイン→login_events(member) +1', await countRows('login_events', { kind: 'eq.member' }) === base.member + 1)
 
-  // 2) Layer2 解除（§04ゲートUI）
+  // 2) 会員ページへ
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 60000 })
-  const code = todayCode()
-  await page.evaluate((c) => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('プラン説明'))
-    const sec = h ? (h.closest('section') || h.parentElement) : null
-    const input = sec && sec.querySelector('input[placeholder="合言葉"]')
-    if (!input) return false
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    setter.call(input, c)
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    return true
-  }, code)
-  await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('プラン説明'))
-    const sec = h ? (h.closest('section') || h.parentElement) : null
-    const btn = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.includes('解除する'))
-    if (btn) btn.click()
-  })
-  await page.waitForTimeout(2500)
-  ok('Layer2解除→login_events(unlock) +1', await countRows('login_events', { kind: 'eq.unlock' }) === base.unlock + 1)
 
   // 3) 実プレーヤーで再生→play_events（§03 先頭動画のライトボックス→再生）
   await page.evaluate(() => {
@@ -117,13 +80,7 @@ async function countRows(table, filter = {}) {
 
   // 4) 管理者ログイン→/admin にログ表示
   const page2 = await ctx.newPage()
-  await page2.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page2.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia-admin-2026' }),
-    })
-  })
+  await loginAsAdmin(page2, BASE)
   await page2.waitForTimeout(800)
   ok('管理者ログイン→login_events(admin) +1', await countRows('login_events', { kind: 'eq.admin' }) === base.admin + 1)
 
@@ -134,13 +91,12 @@ async function countRows(table, filter = {}) {
       hasPlays: t.includes('動画再生回数'),
       hasHistory: t.includes('ログイン履歴'),
       hasMemberRow: t.includes('会員ログイン'),
-      hasUnlockRow: t.includes('コード解除'),
       hasCount: /\d+回/.test(t),
       noUnset: !t.includes('ログ記録は未設定です'),
     }
   })
   ok('/admin 再生回数セクション（○回表示）', adminView.hasPlays && adminView.hasCount)
-  ok('/admin ログイン履歴（会員ログイン・コード解除の行）', adminView.hasHistory && adminView.hasMemberRow && adminView.hasUnlockRow)
+  ok('/admin ログイン履歴（会員ログインの行）', adminView.hasHistory && adminView.hasMemberRow)
   ok('/admin 未設定注記が消えている', adminView.noUnset)
   await page2.screenshot({ path: '/Users/hajime/Desktop/限定公開/_screenshots/qualia-logs-admin.jpeg', type: 'jpeg', quality: 82, fullPage: true })
 

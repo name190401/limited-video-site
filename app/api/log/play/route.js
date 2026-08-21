@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { readLayer1Payload, LAYER1_COOKIE } from '@/lib/auth/layer1';
-import { isVersionCurrent, readPasswordVersion, SITE_PV_KEY } from '@/lib/auth/session-version';
 import { clientIp } from '@/lib/ratelimit';
 import { logPlay } from '@/lib/logs';
 
@@ -10,8 +9,7 @@ export async function POST(request) {
   try {
     const token = request.cookies.get(LAYER1_COOKIE)?.value;
     const payload = await readLayer1Payload(token);
-    const currentVersion = payload ? await readPasswordVersion(SITE_PV_KEY) : 0;
-    if (!payload || !isVersionCurrent(payload, currentVersion)) {
+    if (!payload) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 

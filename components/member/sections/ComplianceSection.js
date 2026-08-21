@@ -4,11 +4,6 @@ import { publishedVideos } from '@/lib/video'
 
 /**
  * 13 法令遵守（読み物・§6）。章扉→本文（max-w-640）＋解説動画＋会員限定資料。
- *
- * 注意: 本セクションには解除UI（UnlockGate）が無い。content-local.js の
- * compliance 行に protection:'layer2' を付けると youtube_id が null になり、
- * {video && ...} のガードで動画カードが無言で消える（§09 training と同じ罠）。
- * Layer2 にしたい場合は先に UnlockGate/usePlanGate をこのセクションへ入れること。
  */
 export default function ComplianceSection({ videos = [] }) {
   const video = publishedVideos(videos)[0] || null

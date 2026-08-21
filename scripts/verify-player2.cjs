@@ -1,5 +1,6 @@
 // カバー方式の3状態検証: 開始直後(カバー) / 定常再生(映像) / 一時停止(カバー)。
 const { chromium } = require('playwright')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
@@ -8,10 +9,7 @@ const BASE = 'http://localhost:3100'
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })
   const page = await ctx.newPage()
 
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'qualia2026' }) })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(1000)
 

@@ -5,7 +5,7 @@ import { pad2 } from '@/lib/format'
 /**
  * ハブ（§5・hero 直下の核）。12 セクションのタイルグリッド。
  * タイルタップ → #sec-NN へ smooth scroll。
- * 準備中タイル=金「準備中」ピル＋opacity0.7。保護2セクション（プラン説明・製品）=金鍵。
+ * 準備中タイル=金「準備中」ピル＋opacity0.7。
  */
 export default function Hub({ sections }) {
   return (
@@ -21,7 +21,6 @@ export default function Hub({ sections }) {
           {sections.map((s) => {
             const num = pad2(s.sort_order)
             const soon = s.status === 'coming_soon'
-            const isProtected = ['plan_intro', 'products'].includes(s.key)
             return (
               <a
                 key={s.key}
@@ -32,13 +31,7 @@ export default function Hub({ sections }) {
               >
                 <div className="flex items-start justify-between">
                   <span className="gold-clip font-cinzel font-medium text-[14px] tracking-[0.10em] leading-none">{num}</span>
-                  {isProtected ? (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <SectionIcon sectionKey={s.key} className="w-5 h-5" />
-                  )}
+                  <SectionIcon sectionKey={s.key} className="w-5 h-5" />
                 </div>
                 <span className="font-serifjp font-semibold text-navy-900 text-[14px] leading-snug">{s.title}</span>
                 {soon && (

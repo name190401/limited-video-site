@@ -1,6 +1,7 @@
 // 事業説明ファネル動画（§03/§04/§05/§08）の検証＋スクショ。MCPの5s制限回避＝headless Chrome 直駆動。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/shoot-funnel.cjs [width]
 const { chromium } = require('playwright')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
@@ -40,13 +41,7 @@ const scrollToHeading = (page, text) =>
   page.on('pageerror', (e) => consoleErrors.push('PAGEERROR: ' + e.message))
 
   // Layer1 ログイン
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(1500)
 
@@ -57,8 +52,7 @@ const scrollToHeading = (page, text) =>
   const has = (id) => all.includes(id)
 
   report.sections.ear_opening = EXPECT.ear_opening.map((id) => ({ id, found: has(id) }))
-  // §04 plan_intro は Layer2 保護化により初期表示では伏せられているのが正（解除後の検証は verify-layer2.cjs）
-  report.sections.plan_intro = EXPECT.plan_intro.map((id) => ({ id, hiddenAsExpected: !has(id) }))
+  report.sections.plan_intro = EXPECT.plan_intro.map((id) => ({ id, found: has(id) }))
   report.sections.bonus = EXPECT.bonus.map((id) => ({ id, found: has(id) }))
 
   // §05 クロージング: タブを順にクリックして各動画IDを確認

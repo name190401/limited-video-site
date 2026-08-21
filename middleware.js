@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
-import { LAYER1_COOKIE, readLayer1Payload } from '@/lib/auth/layer1';
-import { isVersionCurrent, readPasswordVersion, SITE_PV_KEY } from '@/lib/auth/session-version';
+import { inspectLayer1Cookie, LAYER1_COOKIE } from '@/lib/auth/layer1';
 
 /**
- * Layer1 ゲート：有効な共通パスワード Cookie が無ければ /enter へリダイレクト。
+ * 入口ゲート：有効なセッション Cookie（当日の合言葉で発行）が無ければ /enter へリダイレクト。
  *
  * - Cookie 検証は Web Crypto（lib/crypto-token.js）で行うため Edge ランタイムで動く。
  * - /api/* は matcher 除外（各 API ハンドラが自前で認証・認可する）。
  * - /enter（ゲート画面）は素通し。
  * - /admin（管理画面）は Layer1 を免除し、管理者パスワードで自前ゲートする
- *   （保守する人が共通パスワードと管理者パスワードの両方を覚えなくて済むように）。
+ *   （保守する人が当日のコードを持っていなくても管理画面に入れるように）。
  */
 
 function isExempt(pathname) {
@@ -24,23 +23,16 @@ export async function middleware(request) {
   }
 
   const cookie = request.cookies.get(LAYER1_COOKIE)?.value;
-  const payload = await readLayer1Payload(cookie);
+  const inspection = await inspectLayer1Cookie(cookie);
 
-  if (!payload) {
+  if (!inspection.ok) {
     const url = request.nextUrl.clone();
     url.pathname = '/enter';
-    url.search = '';
+    url.search = inspection.reason === 'expired' ? '?e=day' : '';
     return NextResponse.redirect(url);
   }
 
-  const currentVersion = await readPasswordVersion(SITE_PV_KEY);
-  if (!isVersionCurrent(payload, currentVersion)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/enter';
-    url.search = '?e=pw';
-    return NextResponse.redirect(url);
-  }
-
+  // 署名 payload だけで日付と期限を検証し、middleware のネットワーク I/O をゼロに保つ。
   return NextResponse.next();
 }
 

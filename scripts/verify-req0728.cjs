@@ -2,9 +2,7 @@
 // §12副業・§13法令遵守・§14 FAQ、§08製品タブ、§09担当変更、PDF会員ゲートを確認する。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0728.cjs
 const { chromium } = require('playwright')
-const crypto = require('crypto')
-const fs = require('fs')
-const path = require('path')
+const { loginAsMember } = require('./_login.cjs')
 
 const BASE = process.env.BASE || 'http://localhost:3100'
 const PLAN_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
@@ -12,19 +10,6 @@ const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw', 'cbi5ySSheBA']
 const PRODUCT_TABS = ['パーソナル', '全15品', 'BELLEQUAGE', 'インナーケア']
 const TRAINING_IDS = ['MSmZCalPv8k', '_dI-H_n7-Hs', 'VGE1ldPVLK8', 'ZC0cfGnM3RU', 'n-XHJeTc2Lc', 'H3ZscAXE4w8', 'hWvsTr2v1Co', 'xj6dIKdqo1c', 'a5CTH5irn6I']
 const PROTECTED_IDS = [...PLAN_IDS, ...PRODUCT_IDS]
-
-function todayCode() {
-  if (process.env.QCODE) return process.env.QCODE
-  const env = fs.readFileSync(path.join(__dirname, '..', '.env.local'), 'utf8')
-  const key = env.match(/^PASSWORD_SECRET_KEY=(.*)$/m)[1].trim()
-  const jst = new Date(Date.now() + 9 * 3600 * 1000)
-  const d = `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}-${String(jst.getUTCDate()).padStart(2, '0')}`
-  const hash = crypto.createHash('sha256').update(key + d + '0').digest('hex')
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let p = ''
-  for (let i = 0; i < 6; i++) p += chars[parseInt(hash.substr(i * 2, 2), 16) % chars.length]
-  return p
-}
 
 ;(async () => {
   const results = []
@@ -37,13 +22,7 @@ function todayCode() {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 880 }, deviceScaleFactor: 2 })
   const page = await ctx.newPage()
 
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(1200)
 
@@ -97,8 +76,8 @@ function todayCode() {
   check('7. Hubは14タイル＋新2項目', hub.count === 14 && hub.text.some((t) => t.includes('北村弁護士の副業のすすめ')) && hub.text.some((t) => t.includes('法令遵守')), JSON.stringify(hub))
 
   const initialHtml = await page.evaluate(async () => (await fetch('/', { credentials: 'same-origin' })).text())
-  const leaked = PROTECTED_IDS.filter((id) => initialHtml.includes(id))
-  check(`8. 初期HTMLに保護${PROTECTED_IDS.length}IDなし`, leaked.length === 0, leaked.join(',') || 'clean')
+  const visible = PROTECTED_IDS.filter((id) => initialHtml.includes(id))
+  check(`8. ログイン後HTMLに8IDが出る`, visible.length === PROTECTED_IDS.length, `${visible.length}/${PROTECTED_IDS.length}`)
   const trainingInHtml = TRAINING_IDS.filter((id) => initialHtml.includes(id))
   check('8b. 初期HTMLに§09トレーニング9IDが有る（Layer1化）', trainingInHtml.length === 9, `${trainingInHtml.length}/9`)
 
@@ -111,21 +90,7 @@ function todayCode() {
       oldCount: [...(sec?.querySelectorAll('p') || [])].filter((p) => p.textContent.includes('担当：竹之内尚也')).length,
     }
   })
-  check('9. §09は未解除で表示＋噛み砕き担当変更（Layer2解除済み）', training.unlocked && training.staff === '担当：伴隆（ばんたかし）' && training.oldCount === 0, JSON.stringify(training))
-
-  const code = todayCode()
-  const unlocked = await page.evaluate((c) => {
-    const sec = document.querySelector('#sec-04')?.closest('section')
-    const input = sec?.querySelector('input[placeholder="合言葉"]')
-    const button = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.includes('解除する'))
-    if (!input || !button) return false
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    setter.call(input, c)
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    button.click()
-    return true
-  }, code)
-  await page.waitForTimeout(2500)
+  check('9. §09はログイン後に表示＋噛み砕き担当変更', training.unlocked && training.staff === '担当：伴隆（ばんたかし）' && training.oldCount === 0, JSON.stringify(training))
 
   const tabs = await page.evaluate(() => {
     const sec = document.querySelector('#sec-08')?.closest('section')
@@ -166,7 +131,7 @@ function todayCode() {
     .filter(Boolean))
   visibleProtected.forEach((id) => observedIds.add(id))
   const missing = PROTECTED_IDS.filter((id) => !observedIds.has(id))
-  check(`12. 解除後の保護動画${PROTECTED_IDS.length}IDを確認`, missing.length === 0, missing.join(',') || `all ${PROTECTED_IDS.length}`)
+  check(`12. ログイン後の8動画IDを確認`, missing.length === 0, missing.join(',') || `all ${PROTECTED_IDS.length}`)
 
   const pdfUrl = new URL('/docs/compliance.pdf', BASE)
   const guestPdf = await fetch(pdfUrl, { redirect: 'manual' })

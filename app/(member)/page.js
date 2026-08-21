@@ -17,7 +17,6 @@ import ComplianceSection from '@/components/member/sections/ComplianceSection'
 import FaqSection from '@/components/member/sections/FaqSection'
 import { cookies } from 'next/headers'
 import { ADMIN_COOKIE, verifyAdminCookieValue } from '@/lib/auth/admin'
-import PlanGateProvider from '@/components/member/PlanGateProvider'
 import { publishedVideos } from '@/lib/video'
 
 // 動画が DB から来るため毎リクエスト最新を反映（再デプロイ無しで公開反映）。
@@ -40,7 +39,7 @@ export default async function MemberHome() {
   const isAdmin = await verifyAdminCookieValue(cookies().get(ADMIN_COOKIE)?.value)
 
   return (
-    <PlanGateProvider>
+    <>
       <span id="top" />
       <SectionMenu sections={sections} isAdmin={isAdmin} />
       <Hero lead={lead} />
@@ -71,7 +70,7 @@ export default async function MemberHome() {
         steps={[
           { label: 'メニューから見たい項目へ', desc: '右上のメニュー、またはハブから各セクションに飛べます。' },
           { label: '動画はタップで再生', desc: '気になる動画をタップするとその場で再生します。' },
-          { label: '保護動画は合言葉で解除', desc: 'プラン説明・製品は紹介者から合言葉を聞いて開きます。' },
+          { label: '翌日はもう一度コードを入力', desc: '合言葉は毎日変わります。日付が変わったら、その日のコードで入り直してください。' },
         ]}
         video={publishedVideos(v('how_to_use'))[0] || null}
       />
@@ -86,6 +85,6 @@ export default async function MemberHome() {
       <FaqSection faqs={faqs} />
 
       <Footer />
-    </PlanGateProvider>
+    </>
   )
 }

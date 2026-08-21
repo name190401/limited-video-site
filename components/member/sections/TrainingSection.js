@@ -8,8 +8,6 @@ import { pad2 } from '@/lib/format'
 /**
  * 09 トレーニング（§6）。章扉（件数バッジ）→ 9項目を2列タイルグリッド。
  * 各タイル: 番号＋タイトル＋担当（subtitle）＋状態ピル。公開済はタイル内に動画、準備中はピル＋opacity0.7。
- * §09 は Layer1（2026-08-05 クライアント要望で Layer2 保護を解除）。
- *
  * @param {Array} videos  section_key='training' の videos（sort_order 順）
  */
 export default function TrainingSection({ videos = [] }) {

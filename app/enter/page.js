@@ -6,11 +6,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 function PasswordChangedNoticeContent() {
   const searchParams = useSearchParams();
 
-  if (searchParams.get('e') !== 'pw') return null;
+  if (searchParams.get('e') !== 'day') return null;
 
   return (
     <p className="mb-4 text-sm text-gold-200">
-      合言葉が変更されました。新しい合言葉を入力してください。
+      日付が変わりました。本日の合言葉で入り直してください。
     </p>
   );
 }
@@ -37,7 +37,7 @@ export default function EnterPage() {
       const res = await fetch('/api/auth/layer1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password: password.trim() }),
       });
       if (res.ok) {
         router.replace('/');
@@ -45,9 +45,9 @@ export default function EnterPage() {
       } else if (res.status === 429) {
         setError('試行回数が多すぎます。しばらく時間をおいてお試しください。');
       } else if (res.status === 503) {
-        setError('ただいまログインできません。しばらく時間をおいてお試しください。');
+        setError('合言葉をご確認ください。解決しない場合は、時間をおいてお試しください。');
       } else {
-        setError('パスワードが違います');
+        setError('合言葉が違います。本日のものかご確認ください。');
       }
     } catch {
       setError('通信エラーが発生しました');
@@ -83,21 +83,26 @@ export default function EnterPage() {
             </Suspense>
           )}
           <label className="block text-left text-navy-100 text-[12px] mb-2 tracking-[0.06em] font-sansjp">
-            合言葉（パスワード）
+            本日の合言葉（6桁）
           </label>
           <input
-            type="password"
+            /* maxLength は付けない。先頭に空白が混じった貼り付けを 6 文字で切り詰めると
+               末尾が欠けて無言の 401 になる。長さの妥当性はサーバ側で判定する。 */
+            type="text"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="パスワードを入力"
+            placeholder="例）ABC234"
+            inputMode="text"
+            autoCapitalize="characters"
             autoComplete="off"
+            spellCheck={false}
             disabled={loading}
             className="w-full px-4 py-3 rounded-xl bg-navy-800/70 border border-gold-400/40 text-white placeholder-navy-200/50 text-center tracking-wide focus:border-gold-400 focus:outline-none transition-colors"
           />
           {error && <p className="mt-3 text-sm text-rose-300">{error}</p>}
           <button
             type="submit"
-            disabled={loading || password.length === 0}
+            disabled={loading || password.trim().length === 0}
             className="btn-gold mt-6 w-full py-3 rounded-xl font-sansjp font-semibold text-[15px] tracking-[0.06em]"
           >
             {loading ? '確認中…' : 'はいる'}

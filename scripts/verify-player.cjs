@@ -1,6 +1,7 @@
 // 全画面ライトボックス＋YouTube非遷移カスタムプレーヤーの検証。headless Chrome 直駆動。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-player.cjs
 const { chromium } = require('playwright')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
@@ -13,10 +14,7 @@ const BASE = 'http://localhost:3100'
   page.on('pageerror', (e) => consoleErrors.push('PAGEERROR: ' + e.message))
 
   // Layer1
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'qualia2026' }) })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(1200)
 

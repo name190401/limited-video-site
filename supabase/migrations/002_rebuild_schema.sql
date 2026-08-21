@@ -86,14 +86,14 @@ create table public.faqs (
 
 -- ---- 可変設定（サイト共通PW・管理PW 等） -------------------
 create table public.settings (
-  key         text primary key,           -- 'site_password','admin_password'
+  key         text primary key,           -- 現行は 'admin_password' のみ（'site_password' 系は 2026-08-21 の1層化で不使用）
   value       text not null,
   updated_at  timestamptz default now()
 );
 
 -- ---- レート制限 --------------------------------------------
 create table public.rate_limits (
-  key           text primary key,         -- 'scope:ip:jstDate'
+  key           text primary key,         -- 'env:scope:ip:jstDate'（env は VERCEL_ENV ?? 'local'。lib/ratelimit.js が正）
   attempts      integer not null default 0,
   window_start  timestamptz,
   locked_until  timestamptz

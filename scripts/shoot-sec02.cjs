@@ -2,7 +2,9 @@
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/shoot-sec02.cjs <width>
 // Layer1 を fetch ログインしてから / の §02 を数枚キャプチャ。
 const { chromium } = require('playwright')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
+const BASE = process.env.BASE || 'http://localhost:3100'
 
 ;(async () => {
   const width = parseInt(process.argv[2] || '375', 10)
@@ -11,14 +13,8 @@ const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
   const ctx = await browser.newContext({ viewport: { width, height: 880 }, deviceScaleFactor: 2 })
   const page = await ctx.newPage()
 
-  await page.goto('http://localhost:3100/enter', { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
-  await page.goto('http://localhost:3100/', { waitUntil: 'networkidle', timeout: 60000 })
+  await loginAsMember(page, BASE)
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 60000 })
 
   // §02 先頭へ
   const secTop = await page.evaluate(() => {

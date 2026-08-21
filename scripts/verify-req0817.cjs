@@ -1,10 +1,8 @@
 // 追加要望2026.08.17の実測検証（headless Chrome・375px）。
-// BMT差し替え、§08製品4タブと初期表示内への収まり、§13コンプライアンス動画、Layer2非漏洩、Hub鍵を確認する。
+// BMT差し替え、§08製品4タブと初期表示内への収まり、§13コンプライアンス動画を確認する。
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0817.cjs
 const { chromium } = require('playwright')
-const crypto = require('crypto')
-const fs = require('fs')
-const path = require('path')
+const { loginAsMember } = require('./_login.cjs')
 
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = process.env.BASE || 'http://localhost:3100'
@@ -16,19 +14,6 @@ const PRODUCT_IDS = ['tuSEuVC6SQU', '4gJvVLprXJg', 'XOo-ifRXVBw', 'cbi5ySSheBA']
 const PROTECTED_IDS = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE', ...PRODUCT_IDS]
 // §13 法令遵守の解説動画は Layer1（§12 北村弁護士と同じ）。保護ID集合には含めない。
 const COMPLIANCE_ID = '32djx73PG1k'
-
-function todayCode() {
-  if (process.env.QCODE) return process.env.QCODE
-  const env = fs.readFileSync(path.join(__dirname, '..', '.env.local'), 'utf8')
-  const key = env.match(/^PASSWORD_SECRET_KEY=(.*)$/m)[1].trim()
-  const jst = new Date(Date.now() + 9 * 3600 * 1000)
-  const d = `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}-${String(jst.getUTCDate()).padStart(2, '0')}`
-  const hash = crypto.createHash('sha256').update(key + d + '0').digest('hex')
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let p = ''
-  for (let i = 0; i < 6; i++) p += chars[parseInt(hash.substr(i * 2, 2), 16) % chars.length]
-  return p
-}
 
 const sectionData = (page, num) => page.evaluate((n) => {
   const sec = document.querySelector(`#sec-${n}`)?.closest('section')
@@ -105,17 +90,11 @@ const verifyFitPredicate = () => {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 880 }, deviceScaleFactor: 2 })
   const page = await ctx.newPage()
 
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(1200)
 
-  // フェーズA: Layer1ログイン直後・Layer2未解除
+  // 会員ログイン直後
   const rawHtml = await page.evaluate(async () => (await fetch('/', { credentials: 'same-origin' })).text())
   const domBefore = await page.evaluate(() => document.documentElement.outerHTML)
   const rscPayload = await page.evaluate(() => [...document.querySelectorAll('script')]
@@ -126,8 +105,8 @@ const verifyFitPredicate = () => {
     rscPayload: PROTECTED_IDS.filter((id) => rscPayload.includes(id)),
     dom: PROTECTED_IDS.filter((id) => domBefore.includes(id)),
   }
-  check(`8. 未解除時に保護${PROTECTED_IDS.length}IDが生HTML・RSC・DOMへ非漏洩`,
-    leakage.rawHtml.length === 0 && leakage.rscPayload.length === 0 && leakage.dom.length === 0,
+  check(`8. ログイン後に保護${PROTECTED_IDS.length}IDが生HTML・RSC・DOMへ表示`,
+    leakage.rawHtml.length === PROTECTED_IDS.length && leakage.rscPayload.length === PROTECTED_IDS.length && leakage.dom.length === PROTECTED_IDS.length,
     JSON.stringify(leakage))
 
   const locked = await page.evaluate(() => {
@@ -136,8 +115,7 @@ const verifyFitPredicate = () => {
       .map((a) => a.getAttribute('href')).sort()
     return { keyed, count: keyed.length }
   })
-  check('9. Hub鍵アイコンは#sec-04と#sec-08だけ',
-    JSON.stringify(locked.keyed) === JSON.stringify(['#sec-04', '#sec-08']), JSON.stringify(locked))
+  check('9. Hub鍵アイコンは0個', locked.count === 0, JSON.stringify(locked))
 
   const training = await sectionData(page, '09')
   const bmt = await page.evaluate(([newId, staff]) => {
@@ -163,7 +141,7 @@ const verifyFitPredicate = () => {
     training.ids.length === 9 && training.text.includes('公開 9 / 全 9'),
     JSON.stringify({ ids: training.ids, count: training.ids.length, badge: training.text.includes('公開 9 / 全 9') }))
 
-  // §13 法令遵守: 解説動画は Layer1 なので、Layer2 未解除のこの時点で見えていること
+  // §13 法令遵守: 解説動画が会員ログイン後に見えていること
   const compliance = await sectionData(page, '13')
   const complianceCard = await page.evaluate((id) => {
     const sec = document.querySelector('#sec-13')?.closest('section')
@@ -176,7 +154,7 @@ const verifyFitPredicate = () => {
     const pdf = [...sec.querySelectorAll('a')].map((a) => a.getAttribute('href')).filter(Boolean)
     return { found: true, players, matched: players.filter((v) => v === id).length, caption, pdf }
   }, COMPLIANCE_ID)
-  check('10. §13にコンプライアンス動画1本（Layer2未解除でも表示＝Layer1）',
+  check('10. §13にコンプライアンス動画1本',
     complianceCard.found && complianceCard.matched === 1 && complianceCard.players.length === 1,
     JSON.stringify(complianceCard))
   check('11. §13の動画カード見出しが「コンプライアンス」',
@@ -192,21 +170,6 @@ const verifyFitPredicate = () => {
     pdfHref && guestPdf.status === 307,
     JSON.stringify({ pdfHref, guestStatus: guestPdf.status, links: complianceCard.pdf }))
 
-  // フェーズB: §04ゲートからLayer2解除
-  const code = todayCode()
-  const unlocked = await page.evaluate((c) => {
-    const sec = document.querySelector('#sec-04')?.closest('section')
-    const input = sec?.querySelector('input[placeholder="合言葉"]')
-    const button = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.includes('解除する'))
-    if (!input || !button) return false
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    setter.call(input, c)
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    button.click()
-    return true
-  }, code)
-  await page.waitForTimeout(2500)
-
   // §08 内の button は動画プレーヤーの再生ボタン（テキスト無し）も含むため、
   // タブ行コンテナ（最初のタブラベルを持つ button の親）に絞ってから列挙する。
   const tabs = await page.evaluate((labels) => {
@@ -215,8 +178,8 @@ const verifyFitPredicate = () => {
     const row = first?.parentElement
     return [...(row?.querySelectorAll(':scope > button') || [])].map((button) => button.textContent.trim())
   }, PRODUCT_TABS)
-  check(`4. §08解除後のタブは${PRODUCT_TABS.length}つ・指定順`,
-    unlocked && JSON.stringify(tabs) === JSON.stringify(PRODUCT_TABS), JSON.stringify({ tabs, count: tabs.length }))
+  check(`4. §08ログイン後のタブは${PRODUCT_TABS.length}つ・指定順`,
+    JSON.stringify(tabs) === JSON.stringify(PRODUCT_TABS), JSON.stringify({ tabs, count: tabs.length }))
 
   const productViews = []
   for (let i = 0; i < PRODUCT_TABS.length; i++) {

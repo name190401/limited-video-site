@@ -3,8 +3,9 @@
 // という Android Chrome の厳格ポリシーを注入して、修正コードの挙動を実測する。
 //
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-android-autoplay.cjs
-// 前提: localhost:3100 で本番ビルドが稼働、.env.local に Layer1 合言葉 qualia2026。
+// 前提: localhost:3100 で本番ビルドが稼働し、.env.local に認証用秘密値が設定済み。
 const { chromium } = require('playwright')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = 'http://localhost:3100'
 
@@ -98,10 +99,7 @@ async function scenario(browser, mode) {
   const pageErrors = []
   page.on('pageerror', (e) => pageErrors.push(e.message))
 
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'qualia2026' }) })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 90000 })
   await page.waitForTimeout(800)
 

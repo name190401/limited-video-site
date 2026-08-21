@@ -70,12 +70,10 @@ const PASSWORD_ERRORS = {
   length: '8〜64文字で入力してください',
   charset: '半角の英数字と記号のみ使えます（空白は使えません）',
   same_as_current: '現在と同じです',
-  conflict: '会員合言葉と管理者パスワードは同じにできません',
 }
 
-function PasswordSection({ target, value, updatedAt }) {
+function PasswordSection({ value, updatedAt }) {
   const router = useRouter()
-  const isAdmin = target === 'admin'
   const [editing, setEditing] = useState(false)
   const [visible, setVisible] = useState(false)
   const [next, setNext] = useState('')
@@ -102,16 +100,12 @@ function PasswordSection({ target, value, updatedAt }) {
       const response = await fetch('/api/admin/password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target, current, next, confirm }),
+        body: JSON.stringify({ current, next, confirm }),
       })
       const data = await response.json().catch(() => ({}))
       if (response.ok) {
         setSuccess(true)
-        setMessage(
-          isAdmin
-            ? '変更しました。この管理者パスワードでログイン中の端末は、すべて再ログインが必要になります。'
-            : '変更しました。この合言葉でログイン中の端末は、すべて再ログインが必要になります。'
-        )
+        setMessage('変更しました。この管理者パスワードでログイン中の端末は、すべて再ログインが必要になります。')
         closeForm()
         router.refresh()
       } else if (response.status === 503 || data.error === 'service_unavailable') {
@@ -142,10 +136,10 @@ function PasswordSection({ target, value, updatedAt }) {
   return (
     <section className="mt-10">
       <p className="font-cormorant text-gold-400 text-[11px] tracking-[0.34em] [font-variant:small-caps]">
-        {isAdmin ? 'Admin Password' : 'Member Password'}
+        Admin Password
       </p>
       <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">
-        {isAdmin ? '管理者パスワード' : '会員合言葉（サイト共通パスワード）'}
+        管理者パスワード
       </h2>
       <p className="mt-1 text-[11px] font-sansjp text-navy-300">
         最終変更：{updatedAt ? fmtJst(updatedAt) : '—（初期値）'}
@@ -153,13 +147,11 @@ function PasswordSection({ target, value, updatedAt }) {
       <div className="mt-3 rounded-2xl border border-gold-500/25 bg-navy-800/40 px-4 py-4">
         <div className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 flex-1 break-all font-cinzel text-[20px] tracking-[0.1em] text-gold-200">
-            {isAdmin && !visible ? '••••••••' : value}
+            {visible ? value : '••••••••'}
           </span>
-          {isAdmin && (
-            <button type="button" onClick={() => setVisible((shown) => !shown)} className={actionClass}>
-              {visible ? '隠す' : '表示'}
-            </button>
-          )}
+          <button type="button" onClick={() => setVisible((shown) => !shown)} className={actionClass}>
+            {visible ? '隠す' : '表示'}
+          </button>
         </div>
         <div className="mt-3 flex justify-end gap-2">
           <CopyButton value={value} />
@@ -183,7 +175,7 @@ function PasswordSection({ target, value, updatedAt }) {
             type="password"
             value={next}
             onChange={(event) => setNext(event.target.value)}
-            placeholder={isAdmin ? '新しい管理者パスワード' : '新しい合言葉'}
+            placeholder="新しい管理者パスワード"
             autoComplete="new-password"
             disabled={submitting}
             className={inputClass}
@@ -231,34 +223,26 @@ function PasswordSection({ target, value, updatedAt }) {
         </p>
       )}
       <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
-        {isAdmin
-          ? '管理画面へのログインに使うパスワードです。'
-          : 'メンバーがサイトに入るための共通パスワードです（入口の「合言葉」）。日替わりではありません。'}
+        管理画面へのログインに使うパスワードです。
       </p>
       {/* ※ が前段落の行末に取り残されないよう、注意書きは独立した段落にする。 */}
-      {isAdmin && (
-        <p className="mt-2 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
-          ※伏字は覗き見防止のみで、この画面のソースには値が含まれます。共有画面での表示にご注意ください。
-        </p>
-      )}
+      <p className="mt-2 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
+        ※伏字は覗き見防止のみで、この画面のソースには値が含まれます。共有画面での表示にご注意ください。
+      </p>
     </section>
   )
 }
 
 /**
- * 管理ダッシュボード。日替わり Layer2 コード（今日＋今後6日）・会員合言葉・管理者
- * パスワードを表示し、後ろ2つはその場で変更できる（PasswordSection）。
+ * 管理ダッシュボード。入口の日替わりコード（今日＋今後6日）と管理者パスワードを表示し、
+ * 管理者パスワードはその場で変更できる（PasswordSection）。
  * @param {{date:string,code:string}[]} days  先頭が今日（JST）
- * @param {string} sitePassword  会員共通合言葉の現在値
  * @param {string} adminPassword 管理者パスワードの現在値（既定は伏字表示）
- * @param {string|null} sitePasswordUpdatedAt  settings 行の updated_at。null＝初期値のまま
- * @param {string|null} adminPasswordUpdatedAt 同上
+ * @param {string|null} adminPasswordUpdatedAt settings 行の updated_at。null＝初期値のまま
  */
 export default function AdminDashboard({
   days,
-  sitePassword,
   adminPassword,
-  sitePasswordUpdatedAt,
   adminPasswordUpdatedAt,
   loginEvents,
   playStats,
@@ -316,8 +300,8 @@ export default function AdminDashboard({
             Today&apos;s Code
           </p>
           <h2 className="mt-1 font-serifjp text-[15px] text-navy-100">
-            本日の日替わりパスコード
-            <span className="ml-2 text-gold-300">
+            本日の合言葉（サイトに入るコード）
+            <span className="ml-2 inline-block whitespace-nowrap text-gold-300">
               {todayFmt.md}（{todayFmt.wd}）
             </span>
           </h2>
@@ -332,12 +316,18 @@ export default function AdminDashboard({
             </div>
           </div>
           <p className="mt-3 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
-            プラン説明・製品（§04・§08）を解除するための6桁コードです。JST 0:00 に自動で切り替わります。
+            会員・見込み客がサイトに入るための6桁コードです。JST 0:00 に自動で切り替わり、前日のコードは使えなくなります。
+          </p>
+          <p className="mt-2 break-keep text-navy-300 text-[11px] font-sansjp leading-relaxed">
+            日付が変わるとログイン中の方も入り直しになります。<span className="text-gold-200">前夜のうちに翌日分を配っておく</span>と、深夜の問い合わせを防げます。
           </p>
         </section>
 
         {/* 今後7日分 */}
         <section className="mt-10">
+          <p className="mb-3 break-keep rounded-xl border border-gold-500/25 bg-navy-800/40 px-4 py-3 text-navy-300 text-[11px] font-sansjp leading-relaxed">
+            <span className="text-gold-200">この一覧は7日分の玄関の鍵です。</span>まとめて画面共有・スクショ共有しないでください。渡した相手はその日付になればサイト全体に入れます。
+          </p>
           <div className="mb-3 flex items-center gap-3">
             <span className="h-px flex-1 bg-gold-500/25" />
             <span className="font-cormorant text-gold-500 text-[11px] tracking-[0.3em] [font-variant:small-caps]">
@@ -375,9 +365,7 @@ export default function AdminDashboard({
           </ul>
         </section>
 
-        <PasswordSection target="site" value={sitePassword} updatedAt={sitePasswordUpdatedAt} />
-
-        <PasswordSection target="admin" value={adminPassword} updatedAt={adminPasswordUpdatedAt} />
+        <PasswordSection value={adminPassword} updatedAt={adminPasswordUpdatedAt} />
 
         {/* 動画再生回数 */}
         <section className="mt-10">

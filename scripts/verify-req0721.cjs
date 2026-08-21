@@ -1,27 +1,12 @@
 // 追加要望7/21の実測検証（headless Chrome・375px）
 // 1) §03/§05 の新名称（章扉・Hub・メニュー・eyebrow）＋旧名称の残存0
 // 2) §02 講師14名のふりがな表示＋はみ出しなし
-// 3) §09 トレーニング担当者名（Layer2解除不要・2026-08-05にLayer1化）＋語中改行なし
+// 3) §09 トレーニング担当者名＋語中改行なし
 // 使い方: NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0721.cjs
 const { chromium } = require('playwright')
-const crypto = require('crypto')
-const fs = require('fs')
-const path = require('path')
+const { loginAsMember } = require('./_login.cjs')
 const OUT = '/Users/hajime/Desktop/限定公開/_screenshots'
 const BASE = process.env.BASE || 'http://localhost:3100'
-
-function todayCode() {
-  if (process.env.QCODE) return process.env.QCODE
-  const env = fs.readFileSync(path.join(__dirname, '..', '.env.local'), 'utf8')
-  const key = env.match(/^PASSWORD_SECRET_KEY=(.*)$/m)[1].trim()
-  const jst = new Date(Date.now() + 9 * 3600 * 1000)
-  const d = `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}-${String(jst.getUTCDate()).padStart(2, '0')}`
-  const hash = crypto.createHash('sha256').update(key + d + '0').digest('hex')
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let p = ''
-  for (let i = 0; i < 6; i++) p += chars[parseInt(hash.substr(i * 2, 2), 16) % chars.length]
-  return p
-}
 
 const FURIGANA = [
   ['石井諒', 'いしいりょう'], ['久保田幸世', 'くぼたさちよ'], ['中村佳世', 'なかむらかよ'],
@@ -48,13 +33,7 @@ const TRAINING = [
   const page = await ctx.newPage()
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
 
-  await page.goto(`${BASE}/enter`, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  await page.evaluate(async () => {
-    await fetch('/api/auth/layer1', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'qualia2026' }),
-    })
-  })
+  await loginAsMember(page, BASE)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 60000 })
 
   // ── 1) セクション名 ──
@@ -142,7 +121,7 @@ const TRAINING = [
       thumbs: [...sec.querySelectorAll('img')].map((i) => (i.src.match(/\/vi\/([\w-]{11})\//) || [])[1]).filter(Boolean).length,
     }
   })
-  ok('§09は未解除で9項目表示（合言葉入力0）', !!(t09.found && t09.gates === 0 && t09.thumbs === 9), JSON.stringify(t09))
+  ok('§09はログイン後に9項目表示（合言葉入力0）', !!(t09.found && t09.gates === 0 && t09.thumbs === 9), JSON.stringify(t09))
 
   for (const [title, staff] of TRAINING) {
     const r = await page.evaluate(([tt, st]) => {
@@ -162,26 +141,9 @@ const TRAINING = [
       r.found ? (r.staff ? '' : `不一致: ${r.actual}`) : 'タイトルなし')
   }
 
-  // ── 4) Layer2 解除（§04ゲートのUIから・§04/§08が対象）──
-  const code = todayCode()
-  const typed = await page.evaluate((c) => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('プラン説明'))
-    const sec = h ? (h.closest('section') || h.parentElement) : null
-    const input = sec && sec.querySelector('input[placeholder="合言葉"]')
-    if (!input) return false
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    setter.call(input, c)
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    return true
-  }, code)
-  await page.evaluate(() => {
-    const h = [...document.querySelectorAll('h1,h2,h3,h4')].find((e) => e.textContent.includes('プラン説明'))
-    const sec = h ? (h.closest('section') || h.parentElement) : null
-    const btn = sec && [...sec.querySelectorAll('button')].find((b) => b.textContent.includes('解除する'))
-    if (btn) btn.click()
-  })
-  await page.waitForTimeout(2500)
-  ok('Layer2 解除（§04ゲート入力→解除）', typed)
+  const planIds = ['KUYqhhJ_VMY', '1Pf9pBZKcHs', 'AcxykSFFl4o', 'Q2aHPK7DaBE']
+  const planHtml = await page.content()
+  ok('§04に4本がログイン直後から表示', planIds.every((id) => planHtml.includes(id)))
 
   // §09 スクショ
   await page.evaluate(() => {

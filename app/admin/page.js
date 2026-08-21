@@ -1,13 +1,12 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { ADMIN_COOKIE, readAdminPayload } from '@/lib/auth/admin'
-import { ADMIN_PV_KEY, isVersionCurrent, readPasswordVersion } from '@/lib/auth/session-version'
+import { ADMIN_COOKIE, ADMIN_PV_KEY, isVersionCurrent, readAdminPayload } from '@/lib/auth/admin'
 import { getPasswordsForDays } from '@/lib/password'
 import {
   SettingsUnavailableError,
   getAdminPassword,
+  getPasswordVersion,
   getSettingRow,
-  getSitePassword,
 } from '@/lib/settings'
 import AdminDashboard from '@/components/admin/AdminDashboard'
 import { getLoginEvents, getPlayStats, logsEnabled } from '@/lib/logs'
@@ -57,22 +56,18 @@ export default async function AdminPage() {
     redirect('/enter')
   }
 
-  const currentVersion = await readPasswordVersion(ADMIN_PV_KEY)
-  if (!isVersionCurrent(payload, currentVersion)) {
-    redirect('/enter')
-  }
-
-  // 今日＋今後6日（計7日）の Layer2 日替わりコード（グループ0）。
+  // 今日＋今後6日（計7日）の入口コード（グループ0）。サイトに入る合言葉そのもの。
   const days = getPasswordsForDays(7, 1).map((d) => ({
     date: d.date,
     code: d.groups[0].password,
   }))
   let dashboardData
+  let versionIsCurrent
   try {
+    const currentVersion = await getPasswordVersion(ADMIN_PV_KEY)
+    versionIsCurrent = isVersionCurrent(payload, currentVersion)
     dashboardData = await Promise.all([
-      getSitePassword(),
       getAdminPassword(),
-      getSettingRow('site_password'),
       getSettingRow('admin_password'),
       getLoginEvents(50),
       getPlayStats(),
@@ -83,15 +78,15 @@ export default async function AdminPage() {
     }
     throw err
   }
-  const [sitePassword, adminPassword, sitePasswordRow, adminPasswordRow, loginEvents, playStats] =
-    dashboardData
+  if (!versionIsCurrent) {
+    redirect('/enter')
+  }
+  const [adminPassword, adminPasswordRow, loginEvents, playStats] = dashboardData
 
   return (
     <AdminDashboard
       days={days}
-      sitePassword={sitePassword}
       adminPassword={adminPassword}
-      sitePasswordUpdatedAt={sitePasswordRow?.updated_at ?? null}
       adminPasswordUpdatedAt={adminPasswordRow?.updated_at ?? null}
       loginEvents={loginEvents}
       playStats={playStats}
