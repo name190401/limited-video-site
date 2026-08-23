@@ -139,6 +139,7 @@ NODE_PATH=/Users/hajime/.npm-global/lib/node_modules node scripts/verify-req0817
 - `/api/log/play` にレート制限が無い（認証済み会員によるDB増殖ベクトル・低リスク）
 - 管理 Cookie の payload に `exp` が無く、失効が Max-Age のみに依存している（会員 Cookie とは非対称）。世代番号で「管理者パスワードを変えたら失効」はできる
 - Supabase 無料枠は長期未アクセスで一時停止される。ダッシュボードから Restore すれば復旧する
+- **`rate_limits` に行が溜まり続ける**（キーが `env:scope:ip:JST日付` なので IP×日付ごとに1行増え、消す仕組みが無い）。ログイン成功時は該当行が消えるので、残るのは「打ち間違えたまま入り直さなかった」分だけ。2026-08-23 時点で反映後44時間に 9 行。当面は放置でよいが、気になったら `delete from public.rate_limits where window_start < now() - interval '30 days';` で古い行を落とす
 - **`settings` テーブルに残っている `site_password` / `site_password_version` の 2 行は旧機構の残骸**で、現行コードからは参照されない。DB を直接見たときに「まだ固定合言葉がある」と誤読しないこと
 - **Vercel の環境変数 `SITE_PASSWORD` と `PLAN_TOKEN_SECRET` も未使用**。デプロイ後に削除してよい
 - **`lib/supabase/admin.js` 経由の supabase-js にタイムアウトが無い。**Supabase が「エラーも返さず応答しない」状態（ブラウンアウト）だと、管理者ログイン・`/admin`・変更 API に加えて、**会員ログインもレート制限の DB 読み取り（`lib/ratelimit.js` が会員判定より前にある）でプラットフォームの実行時間上限まで待つ**（無応答ホストで 60 秒経っても解決しないことを実測済み）。**フェイルオープンが効くのは「エラーが返る」障害だけ**（接続拒否・TLS 未完了なら undici の connect timeout 約 10.5 秒で error になり素通しされる）
